@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -31,6 +32,13 @@ func (h *BandwidthProfileHandler) Create(c *gin.Context) {
 	var req dto.CreateBandwidthProfileRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		response.BadRequest(c, err.Error())
+		return
+	}
+
+	// Check for duplicate name on this router before attempting MikroTik sync
+	existing, _ := h.service.GetByRouterAndName(c.Request.Context(), routerID, req.Name)
+	if existing != nil {
+		response.Conflict(c, fmt.Sprintf("bandwidth profile with name %q already exists on this router", req.Name))
 		return
 	}
 

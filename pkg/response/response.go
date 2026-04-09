@@ -76,6 +76,11 @@ func NotFound(c *gin.Context, message string) {
 	Error(c, http.StatusNotFound, message)
 }
 
+// Conflict sends 409 Conflict response
+func Conflict(c *gin.Context, message string) {
+	Error(c, http.StatusConflict, message)
+}
+
 // InternalServerError sends 500 Internal Server Error response
 func InternalServerError(c *gin.Context, message string) {
 	Error(c, http.StatusInternalServerError, message)

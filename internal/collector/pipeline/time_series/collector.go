@@ -211,8 +211,6 @@ func (c *Collector) GetStats() map[string]interface{} {
 	}
 }
 
-import "fmt"
-
 // formatFieldName normalizes field name untuk InfluxDB
 func formatFieldName(name string) string {
 	// Replace hyphen dengan underscore

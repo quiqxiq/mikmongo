@@ -15,7 +15,7 @@ func (s *Seeder) seedUsers(ctx context.Context) error {
 		password string
 		role     string
 	}{
-		{"Super Admin", "superadmin@mikmongo.local", "+6280000000001", "SuperAdmin123!", "superadmin"},
+		{"Super Admin", "superadmin@mikmongo.local", "+6280000000001", "admin123!", "superadmin"},
 		{"Admin", "admin@mikmongo.local", "+6280000000002", "Admin123!", "admin"},
 		{"Customer Service", "cs@mikmongo.local", "+6280000000003", "Cs123!", "cs"},
 		{"Billing", "billing@mikmongo.local", "+6280000000004", "Billing123!", "billing"},

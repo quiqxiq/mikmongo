@@ -2,7 +2,6 @@
 package collector
 
 import (
-	"context"
 	"log"
 	"sync"
 	"time"

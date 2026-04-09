@@ -153,6 +153,11 @@ func (s *BandwidthProfileService) GetByCode(ctx context.Context, code string) (*
 	return s.profileRepo.GetByCode(ctx, code)
 }
 
+// GetByRouterAndName gets profile by router ID and name
+func (s *BandwidthProfileService) GetByRouterAndName(ctx context.Context, routerID uuid.UUID, name string) (*model.BandwidthProfile, error) {
+	return s.profileRepo.GetByRouterAndName(ctx, routerID, name)
+}
+
 // List lists profiles with pagination
 func (s *BandwidthProfileService) List(ctx context.Context, limit, offset int) ([]model.BandwidthProfile, int64, error) {
 	profiles, err := s.profileRepo.List(ctx, limit, offset)
