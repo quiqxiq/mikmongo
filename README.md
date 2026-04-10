@@ -1,7 +1,6 @@
 # MikMongo
 
 [![Go](https://img.shields.io/badge/Go-1.25-00ADD8?style=flat&logo=go)](https://go.dev/)
-[![React](https://img.shields.io/badge/React-19-61DAFB?style=flat&logo=react)](https://react.dev/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-4169E1?style=flat&logo=postgresql)](https://www.postgresql.org/)
 [![License](https://img.shields.io/badge/License-Proprietary-red.svg)]()
 
@@ -42,18 +41,7 @@ MikMongo is a full-stack ISP management platform built around MikroTik routers. 
 
 ### Frontend
 
-| Component | Technology |
-|---|---|
-| Framework | React 19 |
-| Language | TypeScript |
-| Build Tool | Vite 8 |
-| Routing | TanStack Router |
-| Data Fetching | TanStack Query |
-| State | Zustand |
-| UI Components | Shadcn UI (Radix + Tailwind CSS) |
-| Charts | Recharts |
-| Forms | React Hook Form + Zod |
-| Testing | Vitest |
+The web UI is maintained in a separate repository. This repository contains backend services and shared backend packages only.
 
 ### Infrastructure
 
@@ -66,7 +54,6 @@ MikMongo is a full-stack ISP management platform built around MikroTik routers. 
 ## Prerequisites
 
 - Go 1.25+
-- Node.js 20+ and pnpm
 - Docker & Docker Compose
 - Goose CLI (`go install github.com/pressly/goose/v3/cmd/goose@latest`)
 - golangci-lint (optional, for linting)
@@ -94,11 +81,9 @@ make seed
 # 6. Start the backend server
 go run cmd/server/main.go
 
-# 7. Start the frontend (separate terminal)
-cd web && pnpm install && pnpm dev
 ```
 
-The API runs on `http://localhost:8080` and the frontend on `http://localhost:5173`.
+The API runs on `http://localhost:8080`.
 
 ## Environment Setup
 
@@ -192,8 +177,6 @@ mikmongo-fully/
 │   ├── http/                   # HTTP handler tests
 │   ├── integration/            # Integration tests
 │   └── mocks/                  # Generated mocks
-├── web/                        # React frontend
-│   └── src/                    # Frontend source code
 ├── deployments/                # Infrastructure configuration
 │   ├── docker-compose.yml      # Development services
 │   ├── docker-compose.monitor.yml # Monitoring stack
@@ -349,16 +332,7 @@ Implement the RouterOS API calls in `pkg/mikrotik/ppp/repository.go`.
 
 ### Frontend Development
 
-The frontend lives in `web/` and is based on the shadcn-admin template. See `web/README.md` for frontend-specific documentation.
-
-```bash
-cd web
-pnpm install          # Install dependencies
-pnpm dev              # Start dev server (port 5173)
-pnpm build            # Production build
-pnpm lint             # Run ESLint
-pnpm test             # Run Vitest
-```
+The frontend has been moved to a separate repository and is no longer included in this codebase.
 
 ## Testing
 
@@ -423,16 +397,13 @@ make docker-build
 
 ### Production Docker Compose
 
-The `docker-compose.yml` has a commented-out `app` service block. Uncomment and configure it for production deployment. The Nginx block is also available for reverse proxying the API and serving the frontend build.
+The `docker-compose.yml` has a commented-out `app` service block. Uncomment and configure it for production deployment. The Nginx block is also available for reverse proxying the API.
 
 ### Manual Deployment
 
 ```bash
 # Build the binary
 CGO_ENABLED=0 go build -o mikmongo ./cmd/server
-
-# Build the frontend
-cd web && pnpm build
 
 # Run with your .env
 ./mikmongo
@@ -443,7 +414,6 @@ cd web && pnpm build
 | Service | Port | Purpose |
 |---|---|---|
 | API Server | 8080 | REST API |
-| Frontend | 5173 | Vite dev server |
 | PostgreSQL | 5432 | Database |
 | Redis | 6379 | Cache |
 | RabbitMQ | 5672 | AMQP |

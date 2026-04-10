@@ -259,17 +259,10 @@ When writing tests:
 | `make test-integration` | Run integration tests | Test results |
 | `make dev` | Hot-reload with Air | Starts server |
 
-## Frontend (web/)
+## Frontend (separate repository)
 
-Based on the shadcn-admin template. Relevant when editing full-stack features.
+The React admin/customer/agent UIs are **not** in this repo; they live in a dedicated frontend repository. This codebase is the Go API and shared backend packages.
 
-| Path | What lives there |
-|---|---|
-| `web/src/routes/` | TanStack Router file-based routes |
-| `web/src/api/` | TanStack React Query data fetching hooks |
-| `web/src/stores/` | Zustand state stores |
-| `web/src/components/ui/` | Shadcn UI primitives |
-| `web/src/features/` | Feature modules (one per domain entity) |
-| `web/src/hooks/` | Shared custom hooks |
+When you need to change UI behavior, work in that repo and keep API contracts aligned with `internal/router/` and `docs/openapi.docs.yml` (if published).
 
-Stack: React 19, TypeScript, Vite 8, TanStack Router, TanStack React Query, Zustand, Shadcn UI, Tailwind CSS.
+Typical stack there: React 19, TypeScript, Vite, TanStack Router, TanStack Query, Zustand, Shadcn UI, Tailwind CSS.

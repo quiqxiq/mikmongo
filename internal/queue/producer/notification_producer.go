@@ -28,7 +28,7 @@ func NewNotificationProducer(client *rabbitmq.Client) *NotificationProducer {
 // PublishNotification publishes a notification event
 func (p *NotificationProducer) PublishNotification(ctx context.Context, event *NotificationEvent) error {
 	if p.client == nil {
-		return nil
+		return errRabbitMQNotConfigured
 	}
 	body, err := json.Marshal(event)
 	if err != nil {

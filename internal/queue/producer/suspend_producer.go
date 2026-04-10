@@ -27,7 +27,7 @@ func NewSuspendProducer(client *rabbitmq.Client) *SuspendProducer {
 // PublishSuspendCustomer publishes a suspend customer event
 func (p *SuspendProducer) PublishSuspendCustomer(ctx context.Context, event *SuspendCustomerEvent) error {
 	if p.client == nil {
-		return nil
+		return errRabbitMQNotConfigured
 	}
 	body, err := json.Marshal(event)
 	if err != nil {

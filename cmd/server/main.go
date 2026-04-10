@@ -54,6 +54,10 @@ func main() {
 		zap.String("port", cfg.App.Port),
 	)
 
+	if err := validateCriticalConfig(cfg); err != nil {
+		logg.Fatal("Invalid configuration", zap.Error(err))
+	}
+
 	// Configure WebSocket allowed origins from environment
 	ws.SetAllowedOrigins(cfg.App.AllowedOrigins)
 
@@ -294,4 +298,19 @@ func parseInt(s string) int {
 	var i int
 	fmt.Sscanf(s, "%d", &i)
 	return i
+}
+
+func validateCriticalConfig(cfg *config.Config) error {
+	if cfg == nil {
+		return fmt.Errorf("config is nil")
+	}
+
+	// Keep local development friction low, but enforce sane secrets elsewhere.
+	if cfg.App.Env != "development" {
+		if cfg.JWT.Secret == "" || cfg.JWT.Secret == "your-secret-key-here" {
+			return fmt.Errorf("JWT_SECRET must be set to a non-default value when APP_ENV is %q", cfg.App.Env)
+		}
+	}
+
+	return nil
 }

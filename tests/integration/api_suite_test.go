@@ -86,7 +86,7 @@ func buildTestRouterFull(t *testing.T, suite *TestSuite) (*gin.Engine, *handler.
 
 	enforcer, err := casbinpkg.NewEnforcer(suite.DB)
 	require.NoError(t, err)
-	mwReg := middleware.NewRegistry(zap.NewNop(), jwtSvc, suite.RedisClient, enforcer)
+	mwReg := middleware.NewRegistry(zap.NewNop(), jwtSvc, suite.RedisClient, enforcer, []string{"*"}, "")
 
 	return router.New(handlerReg, mwReg), handlerReg
 }
@@ -239,7 +239,7 @@ func buildRootTestRouter(t *testing.T, suite *TestSuite) *gin.Engine {
 
 	enforcer, err := casbinpkg.NewEnforcer(suite.RootDB)
 	require.NoError(t, err)
-	mwReg := middleware.NewRegistry(zap.NewNop(), jwtSvc, suite.RedisClient, enforcer)
+	mwReg := middleware.NewRegistry(zap.NewNop(), jwtSvc, suite.RedisClient, enforcer, []string{"*"}, "")
 
 	return router.New(handlerReg, mwReg)
 }

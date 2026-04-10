@@ -29,7 +29,7 @@ func NewBillingProducer(client *rabbitmq.Client) *BillingProducer {
 // PublishGenerateInvoice publishes a generate invoice event
 func (p *BillingProducer) PublishGenerateInvoice(ctx context.Context, event *GenerateInvoiceEvent) error {
 	if p.client == nil {
-		return nil
+		return errRabbitMQNotConfigured
 	}
 	body, err := json.Marshal(event)
 	if err != nil {
