@@ -25,6 +25,7 @@ type CreateBandwidthProfileRequest struct {
 	IsolateProfileName *string  `json:"isolate_profile_name"`
 	SortOrder          *int     `json:"sort_order"`
 	IsVisible          *bool    `json:"is_visible"`
+	RateLimit          *string  `json:"rate_limit"` // stored on model; synced to RouterOS rate-limit
 	// MikroTik PPPProfile pass-through (not stored in DB)
 	MtLocalAddress   *string `json:"mt_local_address"`
 	MtRemoteAddress  *string `json:"mt_remote_address"`
@@ -33,6 +34,8 @@ type CreateBandwidthProfileRequest struct {
 	MtDNSServer      *string `json:"mt_dns_server"`
 	MtSessionTimeout *string `json:"mt_session_timeout"`
 	MtIdleTimeout    *string `json:"mt_idle_timeout"`
+	// MtRateLimit overrides model rate_limit for this sync only (not persisted).
+	MtRateLimit *string `json:"mt_rate_limit"`
 }
 
 // ToModel converts the create request to a model.BandwidthProfile.
@@ -69,6 +72,9 @@ func (r *CreateBandwidthProfileRequest) ToModel(routerID string) *model.Bandwidt
 	} else {
 		m.IsVisible = true
 	}
+	if r.RateLimit != nil {
+		m.RateLimit = r.RateLimit
+	}
 	return m
 }
 
@@ -88,6 +94,7 @@ type UpdateBandwidthProfileRequest struct {
 	SortOrder          *int     `json:"sort_order"`
 	IsActive           *bool    `json:"is_active"`
 	IsVisible          *bool    `json:"is_visible"`
+	RateLimit          *string  `json:"rate_limit"`
 	// MikroTik pass-through
 	MtLocalAddress   *string `json:"mt_local_address"`
 	MtRemoteAddress  *string `json:"mt_remote_address"`
@@ -96,6 +103,7 @@ type UpdateBandwidthProfileRequest struct {
 	MtDNSServer      *string `json:"mt_dns_server"`
 	MtSessionTimeout *string `json:"mt_session_timeout"`
 	MtIdleTimeout    *string `json:"mt_idle_timeout"`
+	MtRateLimit      *string `json:"mt_rate_limit"`
 }
 
 // ApplyTo applies non-nil fields to the existing model.
@@ -139,6 +147,9 @@ func (r *UpdateBandwidthProfileRequest) ApplyTo(m *model.BandwidthProfile) {
 	if r.IsVisible != nil {
 		m.IsVisible = *r.IsVisible
 	}
+	if r.RateLimit != nil {
+		m.RateLimit = r.RateLimit
+	}
 }
 
 // === RESPONSE ===
@@ -173,6 +184,7 @@ type BandwidthProfileResponse struct {
 	SortOrder          int             `json:"sort_order"`
 	GracePeriodDays    int             `json:"grace_period_days"`
 	IsolateProfileName *string         `json:"isolate_profile_name,omitempty"`
+	RateLimit          *string         `json:"rate_limit,omitempty"` // persisted limit string; live value also under mikrotik.rate_limit
 	CreatedAt          time.Time       `json:"created_at"`
 	UpdatedAt          time.Time       `json:"updated_at"`
 	Mikrotik           *PPPProfileInfo `json:"mikrotik,omitempty"` // nil when router unreachable
@@ -200,6 +212,7 @@ func ProfileToResponse(m *model.BandwidthProfile, mt *mkdomain.PPPProfile) Bandw
 		SortOrder:          m.SortOrder,
 		GracePeriodDays:    m.GracePeriodDays,
 		IsolateProfileName: m.IsolateProfileName,
+		RateLimit:          m.RateLimit,
 		CreatedAt:          m.CreatedAt,
 		UpdatedAt:          m.UpdatedAt,
 	}

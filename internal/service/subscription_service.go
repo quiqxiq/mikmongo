@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"sync"
 	"time"
@@ -17,11 +18,13 @@ import (
 
 // PPPSecretConfig holds MikroTik-only fields for PPP secrets (not stored in DB).
 type PPPSecretConfig struct {
-	Service       *string
-	LocalAddress  *string
-	Routes        *string
-	LimitBytesIn  *int64
-	LimitBytesOut *int64
+	Service        *string
+	LocalAddress   *string
+	RemoteAddress  *string // overrides StaticIP for RouterOS remote-address when set
+	Comment        *string // overrides default "sub:<id>" when set
+	Routes         *string
+	LimitBytesIn   *int64
+	LimitBytesOut  *int64
 }
 
 // SubscriptionService handles subscription business logic
@@ -91,7 +94,6 @@ func (s *SubscriptionService) Create(ctx context.Context, sub *model.Subscriptio
 		return fmt.Errorf("failed to connect to router: %w", err)
 	}
 
-	// Create PPP secret in MikroTik
 	if err := s.createInMikroTik(ctx, mt, sub, profile, mtCfg); err != nil {
 		return fmt.Errorf("failed to create in mikrotik: %w", err)
 	}
@@ -203,15 +205,17 @@ func (s *SubscriptionService) Update(ctx context.Context, sub *model.Subscriptio
 		return fmt.Errorf("plan not found: %w", err)
 	}
 
-	// Update PPP secret in MikroTik
-	if err := s.updateInMikroTik(ctx, mt, sub, profile, mtCfg); err != nil {
+	if err := s.updateInMikroTik(ctx, mt, sub, profile, mtCfg, existingSub); err != nil {
 		return fmt.Errorf("failed to update in mikrotik: %w", err)
 	}
 
-	// Update database only if MikroTik succeeded
 	if err := s.subRepo.Update(ctx, sub); err != nil {
-		// Rollback: restore old data in MikroTik (no extra MikroTik opts for rollback)
-		_ = s.updateInMikroTik(ctx, mt, existingSub, profile, &PPPSecretConfig{})
+		oldPlanID, perr := uuid.Parse(existingSub.PlanID)
+		if perr == nil {
+			if oldProfile, gerr := s.profileRepo.GetByID(ctx, oldPlanID); gerr == nil {
+				_ = s.updateInMikroTik(ctx, mt, existingSub, oldProfile, &PPPSecretConfig{}, existingSub)
+			}
+		}
 		return fmt.Errorf("failed to update subscription: %w", err)
 	}
 
@@ -278,95 +282,96 @@ func (s *SubscriptionService) Activate(ctx context.Context, id uuid.UUID) error 
 	return nil
 }
 
-// createInMikroTik creates PPP secret in MikroTik and captures the RouterOS ID.
-func (s *SubscriptionService) createInMikroTik(ctx context.Context, mt MikrotikClientAdapter, sub *model.Subscription, profile *model.BandwidthProfile, mtCfg *PPPSecretConfig) error {
+// buildPPPSecret builds RouterOS /ppp/secret payload: name, password, service (default pppoe), profile, local/remote-address, comment, routes, byte limits.
+func (s *SubscriptionService) buildPPPSecret(sub *model.Subscription, profile *model.BandwidthProfile, mtCfg *PPPSecretConfig) *mkdomain.PPPSecret {
+	if mtCfg == nil {
+		mtCfg = &PPPSecretConfig{}
+	}
 	secret := &mkdomain.PPPSecret{
 		Name:     sub.Username,
 		Password: sub.Password,
 		Profile:  profile.Name,
-		Comment:  fmt.Sprintf("sub:%s", sub.ID),
-		Service:  "pppoe", // default sama dengan gembok-simple
+		Service:  "pppoe",
 	}
-	if sub.StaticIP != nil {
+	if mtCfg.Comment != nil && *mtCfg.Comment != "" {
+		secret.Comment = *mtCfg.Comment
+	} else {
+		secret.Comment = fmt.Sprintf("sub:%s", sub.ID)
+	}
+	if mtCfg.Service != nil && *mtCfg.Service != "" {
+		secret.Service = *mtCfg.Service
+	}
+	if mtCfg.LocalAddress != nil {
+		secret.LocalAddress = *mtCfg.LocalAddress
+	}
+	if mtCfg.RemoteAddress != nil && *mtCfg.RemoteAddress != "" {
+		secret.RemoteAddress = *mtCfg.RemoteAddress
+	} else if sub.StaticIP != nil {
 		secret.RemoteAddress = *sub.StaticIP
 	}
-	if mtCfg != nil {
-		if mtCfg.Service != nil {
-			secret.Service = *mtCfg.Service // override jika eksplisit
-		}
-		if mtCfg.LocalAddress != nil {
-			secret.LocalAddress = *mtCfg.LocalAddress
-		}
-		if mtCfg.Routes != nil {
-			secret.Routes = *mtCfg.Routes
-		}
-		if mtCfg.LimitBytesIn != nil {
-			secret.LimitBytesIn = *mtCfg.LimitBytesIn
-		}
-		if mtCfg.LimitBytesOut != nil {
-			secret.LimitBytesOut = *mtCfg.LimitBytesOut
-		}
+	if mtCfg.Routes != nil {
+		secret.Routes = *mtCfg.Routes
+	}
+	if mtCfg.LimitBytesIn != nil {
+		secret.LimitBytesIn = *mtCfg.LimitBytesIn
+	}
+	if mtCfg.LimitBytesOut != nil {
+		secret.LimitBytesOut = *mtCfg.LimitBytesOut
+	}
+	return secret
+}
+
+// createInMikroTik creates PPP secret in MikroTik and captures the RouterOS ID. Fails if the username already exists on the router.
+func (s *SubscriptionService) createInMikroTik(ctx context.Context, mt MikrotikClientAdapter, sub *model.Subscription, profile *model.BandwidthProfile, mtCfg *PPPSecretConfig) error {
+	existing, err := mt.GetSecretByName(ctx, sub.Username)
+	if err != nil {
+		return fmt.Errorf("mikrotik: lookup ppp secret: %w", err)
+	}
+	if existing != nil {
+		return fmt.Errorf("%w: %q", ErrMikrotikPPPSecretExists, sub.Username)
 	}
 
+	secret := s.buildPPPSecret(sub, profile, mtCfg)
 	if err := mt.AddSecret(ctx, secret); err != nil {
 		return err
 	}
 
-	// Capture the RouterOS ID for future direct lookups
 	created, err := mt.GetSecretByName(ctx, sub.Username)
-	if err == nil && created != nil {
-		sub.MtPPPID = &created.ID
+	if err != nil {
+		return fmt.Errorf("mikrotik: read ppp secret after add: %w", err)
 	}
+	if created == nil {
+		return fmt.Errorf("mikrotik: ppp secret %q not found after add", sub.Username)
+	}
+	sub.MtPPPID = &created.ID
 	return nil
 }
 
-// getPPPID returns the RouterOS PPP secret ID, preferring the stored MtPPPID over a live lookup
-func (s *SubscriptionService) getPPPID(ctx context.Context, mt MikrotikClientAdapter, sub *model.Subscription) (string, error) {
+// resolvePPPSecretID returns RouterOS .id for the subscription's PPP secret (stored ID or live lookup by username).
+func (s *SubscriptionService) resolvePPPSecretID(ctx context.Context, mt MikrotikClientAdapter, sub *model.Subscription) (string, error) {
 	if sub.MtPPPID != nil && *sub.MtPPPID != "" {
 		return *sub.MtPPPID, nil
 	}
 	existing, err := mt.GetSecretByName(ctx, sub.Username)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("mikrotik: lookup ppp secret: %w", err)
+	}
+	if existing == nil {
+		return "", fmt.Errorf("%w: name=%q", ErrMikrotikPPPSecretNotFound, sub.Username)
 	}
 	return existing.ID, nil
 }
 
-// updateInMikroTik updates PPP secret in MikroTik.
-func (s *SubscriptionService) updateInMikroTik(ctx context.Context, mt MikrotikClientAdapter, sub *model.Subscription, profile *model.BandwidthProfile, mtCfg *PPPSecretConfig) error {
-	secret := &mkdomain.PPPSecret{
-		Name:     sub.Username,
-		Password: sub.Password,
-		Profile:  profile.Name,
-		Comment:  fmt.Sprintf("sub:%s", sub.ID),
-		Service:  "pppoe", // default sama dengan gembok-simple
+// updateInMikroTik updates an existing PPP secret. secretLookup is the subscription row used to resolve RouterOS .id (before username/plan changes).
+func (s *SubscriptionService) updateInMikroTik(ctx context.Context, mt MikrotikClientAdapter, desired *model.Subscription, profile *model.BandwidthProfile, mtCfg *PPPSecretConfig, secretLookup *model.Subscription) error {
+	if secretLookup == nil {
+		secretLookup = desired
 	}
-	if sub.StaticIP != nil {
-		secret.RemoteAddress = *sub.StaticIP
+	id, err := s.resolvePPPSecretID(ctx, mt, secretLookup)
+	if err != nil {
+		return err
 	}
-	if mtCfg != nil {
-		if mtCfg.Service != nil {
-			secret.Service = *mtCfg.Service // override jika eksplisit
-		}
-		if mtCfg.LocalAddress != nil {
-			secret.LocalAddress = *mtCfg.LocalAddress
-		}
-		if mtCfg.Routes != nil {
-			secret.Routes = *mtCfg.Routes
-		}
-		if mtCfg.LimitBytesIn != nil {
-			secret.LimitBytesIn = *mtCfg.LimitBytesIn
-		}
-		if mtCfg.LimitBytesOut != nil {
-			secret.LimitBytesOut = *mtCfg.LimitBytesOut
-		}
-	}
-
-	id, err := s.getPPPID(ctx, mt, sub)
-	if err == nil {
-		return mt.UpdateSecret(ctx, id, secret)
-	}
-	return mt.AddSecret(ctx, secret)
+	return mt.UpdateSecret(ctx, id, s.buildPPPSecret(desired, profile, mtCfg))
 }
 
 // getIsolateProfile returns the isolate profile name from system_settings or the profile's override
@@ -422,7 +427,7 @@ func (s *SubscriptionService) Isolate(ctx context.Context, id uuid.UUID, reason 
 
 // applyProfile sets a new profile name on the PPP secret
 func (s *SubscriptionService) applyProfile(ctx context.Context, mt MikrotikClientAdapter, sub *model.Subscription, profileName string) error {
-	id, err := s.getPPPID(ctx, mt, sub)
+	id, err := s.resolvePPPSecretID(ctx, mt, sub)
 	if err != nil {
 		return err
 	}
@@ -493,7 +498,7 @@ func (s *SubscriptionService) Suspend(ctx context.Context, id uuid.UUID, reason 
 
 // disableInMikroTik disables the PPP secret
 func (s *SubscriptionService) disableInMikroTik(ctx context.Context, mt MikrotikClientAdapter, sub *model.Subscription) error {
-	id, err := s.getPPPID(ctx, mt, sub)
+	id, err := s.resolvePPPSecretID(ctx, mt, sub)
 	if err != nil {
 		return err
 	}
@@ -502,7 +507,7 @@ func (s *SubscriptionService) disableInMikroTik(ctx context.Context, mt Mikrotik
 
 // enableInMikroTik enables the PPP secret
 func (s *SubscriptionService) enableInMikroTik(ctx context.Context, mt MikrotikClientAdapter, sub *model.Subscription) error {
-	id, err := s.getPPPID(ctx, mt, sub)
+	id, err := s.resolvePPPSecretID(ctx, mt, sub)
 	if err != nil {
 		return err
 	}
@@ -538,9 +543,12 @@ func (s *SubscriptionService) Terminate(ctx context.Context, id uuid.UUID) error
 
 // removeFromMikroTik removes the PPP secret from MikroTik
 func (s *SubscriptionService) removeFromMikroTik(ctx context.Context, mt MikrotikClientAdapter, sub *model.Subscription) error {
-	id, err := s.getPPPID(ctx, mt, sub)
+	id, err := s.resolvePPPSecretID(ctx, mt, sub)
 	if err != nil {
-		return nil // already gone
+		if errors.Is(err, ErrMikrotikPPPSecretNotFound) {
+			return nil
+		}
+		return err
 	}
 	return mt.RemoveSecret(ctx, id)
 }

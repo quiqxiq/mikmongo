@@ -612,10 +612,15 @@ components:
           type: integer
         is_visible:
           type: boolean
+        rate_limit:
+          type: string
+          description: Persisted RouterOS-style rate limit (e.g. 10M/20M). If omitted, derived from upload/download speeds when syncing to MikroTik.
         mt_local_address:
           type: string
+          description: PPP profile local-address on MikroTik
         mt_remote_address:
           type: string
+          description: PPP profile remote-address (pool or CIDR) on MikroTik
         mt_parent_queue:
           type: string
         mt_queue_type:
@@ -624,8 +629,12 @@ components:
           type: string
         mt_session_timeout:
           type: string
+          description: PPP profile session-timeout (RouterOS time string)
         mt_idle_timeout:
           type: string
+        mt_rate_limit:
+          type: string
+          description: Overrides rate-limit on MikroTik for this request only (not stored in DB)
 
     UpdateBandwidthProfileRequest:
       type: object
@@ -663,6 +672,9 @@ components:
           type: boolean
         is_active:
           type: boolean
+        rate_limit:
+          type: string
+          description: Persisted rate limit string on the bandwidth profile
         mt_local_address:
           type: string
         mt_remote_address:
@@ -677,6 +689,9 @@ components:
           type: string
         mt_idle_timeout:
           type: string
+        mt_rate_limit:
+          type: string
+          description: MikroTik-only rate-limit override for this update (not persisted)
 
     PPPProfileInfo:
       type: object
@@ -740,6 +755,9 @@ components:
           type: integer
         isolate_profile_name:
           type: string
+        rate_limit:
+          type: string
+          description: Optional stored rate limit; live router value is under mikrotik.rate_limit when present
         created_at:
           type: string
           format: date-time
@@ -779,8 +797,15 @@ components:
           type: string
         mt_service:
           type: string
+          description: RouterOS PPP secret service (default pppoe)
         mt_local_address:
           type: string
+        mt_remote_address:
+          type: string
+          description: RouterOS remote-address; overrides static_ip for MikroTik when set
+        mt_comment:
+          type: string
+          description: RouterOS comment (default sub:{subscription_id})
         mt_routes:
           type: string
         mt_limit_bytes_in:
@@ -814,6 +839,10 @@ components:
           type: string
         mt_local_address:
           type: string
+        mt_remote_address:
+          type: string
+        mt_comment:
+          type: string
         mt_routes:
           type: string
         mt_limit_bytes_in:
@@ -842,6 +871,9 @@ components:
         limit_bytes_out:
           type: integer
           format: int64
+        comment:
+          type: string
+          description: RouterOS /ppp/secret comment when live data is returned
         disabled:
           type: boolean
 
@@ -3212,6 +3244,7 @@ paths:
     post:
       tags: [Bandwidth Profiles]
       summary: Create bandwidth profile
+      description: Creates the row and adds a PPP profile on MikroTik. Fails with 409 if a PPP profile with the same name already exists on the router (no DB row is created).
       operationId: createBandwidthProfile
       security:
         - BearerAuth: []
@@ -3235,6 +3268,24 @@ paths:
                     properties:
                       data:
                         $ref: '#/components/schemas/BandwidthProfileResponse'
+        '400':
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: PPP profile name already exists on MikroTik
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: MikroTik sync or server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
   /api/v1/routers/{router_id}/bandwidth-profiles/{id}:
     get:
@@ -3261,6 +3312,7 @@ paths:
     put:
       tags: [Bandwidth Profiles]
       summary: Update bandwidth profile
+      description: Updates the row and sets the PPP profile on MikroTik. Returns 400 if the PPP profile is not found on the router (e.g. renamed or deleted outside the app).
       operationId: updateBandwidthProfile
       security:
         - BearerAuth: []
@@ -3285,6 +3337,18 @@ paths:
                     properties:
                       data:
                         $ref: '#/components/schemas/BandwidthProfileResponse'
+        '400':
+          description: PPP profile missing on router or invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: MikroTik sync or server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
     delete:
       tags: [Bandwidth Profiles]
       summary: Delete bandwidth profile
@@ -3331,6 +3395,7 @@ paths:
     post:
       tags: [Subscriptions]
       summary: Create subscription
+      description: Creates the subscription and adds a PPP secret on MikroTik. Fails with 409 if the username already exists as a PPP secret on the router.
       operationId: createSubscription
       security:
         - BearerAuth: []
@@ -3354,6 +3419,24 @@ paths:
                     properties:
                       data:
                         $ref: '#/components/schemas/SubscriptionResponse'
+        '400':
+          description: Validation or business rule error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: PPP secret username already exists on MikroTik
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Server or MikroTik error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
   /api/v1/routers/{router_id}/subscriptions/{id}:
     get:
@@ -3380,6 +3463,7 @@ paths:
     put:
       tags: [Subscriptions]
       summary: Update subscription
+      description: Updates the row and the PPP secret on MikroTik. Returns 400 if the secret is not found on the router.
       operationId: updateSubscription
       security:
         - BearerAuth: []
@@ -3404,6 +3488,18 @@ paths:
                     properties:
                       data:
                         $ref: '#/components/schemas/SubscriptionResponse'
+        '400':
+          description: PPP secret not found on router or invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Server or MikroTik error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
     delete:
       tags: [Subscriptions]
       summary: Delete subscription

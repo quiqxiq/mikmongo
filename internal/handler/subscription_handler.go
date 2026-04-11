@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -37,14 +38,20 @@ func (h *SubscriptionHandler) Create(c *gin.Context) {
 	sub := req.ToModel(routerID.String())
 
 	mtCfg := &service.PPPSecretConfig{
-		Service:       req.MtService,
-		LocalAddress:  req.MtLocalAddress,
-		Routes:        req.MtRoutes,
-		LimitBytesIn:  req.MtLimitBytesIn,
-		LimitBytesOut: req.MtLimitBytesOut,
+		Service:        req.MtService,
+		LocalAddress:   req.MtLocalAddress,
+		RemoteAddress:  req.MtRemoteAddress,
+		Comment:        req.MtComment,
+		Routes:         req.MtRoutes,
+		LimitBytesIn:   req.MtLimitBytesIn,
+		LimitBytesOut:  req.MtLimitBytesOut,
 	}
 
 	if err := h.service.Create(c.Request.Context(), sub, mtCfg); err != nil {
+		if errors.Is(err, service.ErrMikrotikPPPSecretExists) {
+			response.Conflict(c, err.Error())
+			return
+		}
 		response.Error(c, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -111,14 +118,20 @@ func (h *SubscriptionHandler) Update(c *gin.Context) {
 	req.ApplyTo(sub)
 
 	mtCfg := &service.PPPSecretConfig{
-		Service:       req.MtService,
-		LocalAddress:  req.MtLocalAddress,
-		Routes:        req.MtRoutes,
-		LimitBytesIn:  req.MtLimitBytesIn,
-		LimitBytesOut: req.MtLimitBytesOut,
+		Service:        req.MtService,
+		LocalAddress:   req.MtLocalAddress,
+		RemoteAddress:  req.MtRemoteAddress,
+		Comment:        req.MtComment,
+		Routes:         req.MtRoutes,
+		LimitBytesIn:   req.MtLimitBytesIn,
+		LimitBytesOut:  req.MtLimitBytesOut,
 	}
 
 	if err := h.service.Update(c.Request.Context(), sub, mtCfg); err != nil {
+		if errors.Is(err, service.ErrMikrotikPPPSecretNotFound) {
+			response.Error(c, http.StatusBadRequest, err.Error())
+			return
+		}
 		response.InternalServerError(c, err.Error())
 		return
 	}

@@ -23,11 +23,13 @@ type CreateSubscriptionRequest struct {
 	GracePeriodDays *int    `json:"grace_period_days"`
 	Notes           *string `json:"notes"`
 	// MikroTik PPPSecret pass-through (not stored in DB)
-	MtService       *string `json:"mt_service"`
-	MtLocalAddress  *string `json:"mt_local_address"`
-	MtRoutes        *string `json:"mt_routes"`
-	MtLimitBytesIn  *int64  `json:"mt_limit_bytes_in"`
-	MtLimitBytesOut *int64  `json:"mt_limit_bytes_out"`
+	MtService        *string `json:"mt_service"`
+	MtLocalAddress   *string `json:"mt_local_address"`
+	MtRemoteAddress  *string `json:"mt_remote_address"` // RouterOS remote-address (overrides static_ip when set)
+	MtComment        *string `json:"mt_comment"`       // RouterOS comment (overrides default sub:<id>)
+	MtRoutes         *string `json:"mt_routes"`
+	MtLimitBytesIn   *int64  `json:"mt_limit_bytes_in"`
+	MtLimitBytesOut  *int64  `json:"mt_limit_bytes_out"`
 }
 
 // ToModel converts the create request to a model.Subscription.
@@ -69,11 +71,13 @@ type UpdateSubscriptionRequest struct {
 	GracePeriodDays *int    `json:"grace_period_days"`
 	Notes           *string `json:"notes"`
 	// MikroTik pass-through
-	MtService       *string `json:"mt_service"`
-	MtLocalAddress  *string `json:"mt_local_address"`
-	MtRoutes        *string `json:"mt_routes"`
-	MtLimitBytesIn  *int64  `json:"mt_limit_bytes_in"`
-	MtLimitBytesOut *int64  `json:"mt_limit_bytes_out"`
+	MtService        *string `json:"mt_service"`
+	MtLocalAddress   *string `json:"mt_local_address"`
+	MtRemoteAddress  *string `json:"mt_remote_address"`
+	MtComment        *string `json:"mt_comment"`
+	MtRoutes         *string `json:"mt_routes"`
+	MtLimitBytesIn   *int64  `json:"mt_limit_bytes_in"`
+	MtLimitBytesOut  *int64  `json:"mt_limit_bytes_out"`
 }
 
 // ApplyTo applies non-nil fields to the existing model.
@@ -116,6 +120,7 @@ type PPPSecretInfo struct {
 	Routes        string `json:"routes,omitempty"`
 	LimitBytesIn  int64  `json:"limit_bytes_in,omitempty"`
 	LimitBytesOut int64  `json:"limit_bytes_out,omitempty"`
+	Comment       string `json:"comment,omitempty"`
 	Disabled      bool   `json:"disabled"`
 }
 
@@ -175,6 +180,7 @@ func SubscriptionToResponse(m *model.Subscription, mt *mkdomain.PPPSecret) Subsc
 			Routes:        mt.Routes,
 			LimitBytesIn:  mt.LimitBytesIn,
 			LimitBytesOut: mt.LimitBytesOut,
+			Comment:       mt.Comment,
 			Disabled:      mt.Disabled,
 		}
 	}

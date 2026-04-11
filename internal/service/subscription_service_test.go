@@ -82,8 +82,9 @@ func TestCreate_Success(t *testing.T) {
 	}
 
 	profileRepo.On("GetByID", ctx, ids.planID).Return(profile, nil)
-	adapter.On("AddSecret", ctx, mock.AnythingOfType("*domain.PPPSecret")).Return(nil)
-	adapter.On("GetSecretByName", ctx, "user1").Return(&mkdomain.PPPSecret{ID: "*1", Name: "user1"}, nil)
+	adapter.On("GetSecretByName", ctx, "user1").Return(nil, nil).Once()
+	adapter.On("AddSecret", ctx, mock.AnythingOfType("*domain.PPPSecret")).Return(nil).Once()
+	adapter.On("GetSecretByName", ctx, "user1").Return(&mkdomain.PPPSecret{ID: "*1", Name: "user1"}, nil).Once()
 	subRepo.On("Create", ctx, mock.AnythingOfType("*model.Subscription")).Return(nil)
 
 	err := svc.Create(ctx, sub, nil)
@@ -136,7 +137,8 @@ func TestCreate_MikrotikAddSecretFails(t *testing.T) {
 		Password: "pass1234",
 	}
 	profileRepo.On("GetByID", ctx, ids.planID).Return(profile, nil)
-	adapter.On("AddSecret", ctx, mock.AnythingOfType("*domain.PPPSecret")).Return(errors.New("ppp error"))
+	adapter.On("GetSecretByName", ctx, "user1").Return(nil, nil).Once()
+	adapter.On("AddSecret", ctx, mock.AnythingOfType("*domain.PPPSecret")).Return(errors.New("ppp error")).Once()
 
 	err := svc.Create(ctx, sub, nil)
 	assert.ErrorContains(t, err, "ppp error")
@@ -161,9 +163,9 @@ func TestCreate_DBSaveFails_RollbackMikrotik(t *testing.T) {
 	}
 
 	profileRepo.On("GetByID", ctx, ids.planID).Return(profile, nil)
-	adapter.On("AddSecret", ctx, mock.AnythingOfType("*domain.PPPSecret")).Return(nil)
-	// createInMikroTik captures the ID via GetSecretByName
-	adapter.On("GetSecretByName", ctx, "user1").Return(&mkdomain.PPPSecret{ID: "*1", Name: "user1"}, nil)
+	adapter.On("GetSecretByName", ctx, "user1").Return(nil, nil).Once()
+	adapter.On("AddSecret", ctx, mock.AnythingOfType("*domain.PPPSecret")).Return(nil).Once()
+	adapter.On("GetSecretByName", ctx, "user1").Return(&mkdomain.PPPSecret{ID: "*1", Name: "user1"}, nil).Once()
 	subRepo.On("Create", ctx, mock.AnythingOfType("*model.Subscription")).Return(errors.New("db error"))
 	// rollback path: MtPPPID is now set to "*1", so RemoveSecret is called directly
 	adapter.On("RemoveSecret", ctx, "*1").Return(nil)
@@ -171,6 +173,32 @@ func TestCreate_DBSaveFails_RollbackMikrotik(t *testing.T) {
 	err := svc.Create(ctx, sub, nil)
 	assert.ErrorContains(t, err, "db error")
 	adapter.AssertCalled(t, "RemoveSecret", ctx, "*1")
+}
+
+func TestCreate_SecretAlreadyExistsOnRouter(t *testing.T) {
+	ctx := context.Background()
+	svc, subRepo, profileRepo, _, adapter, _ := newSubServiceWithMocks()
+	ids := newTestIDs()
+
+	profile := &model.BandwidthProfile{
+		ID:       ids.planID.String(),
+		RouterID: ids.routerID.String(),
+		Name:     "plan-10m",
+	}
+	sub := &model.Subscription{
+		RouterID: ids.routerID.String(),
+		PlanID:   ids.planID.String(),
+		Username: "user1",
+		Password: "pass1234",
+	}
+	profileRepo.On("GetByID", ctx, ids.planID).Return(profile, nil)
+	adapter.On("GetSecretByName", ctx, "user1").Return(&mkdomain.PPPSecret{ID: "*9", Name: "user1"}, nil).Once()
+
+	err := svc.Create(ctx, sub, nil)
+	require.Error(t, err)
+	assert.ErrorIs(t, err, ErrMikrotikPPPSecretExists)
+	adapter.AssertNotCalled(t, "AddSecret", mock.Anything, mock.Anything)
+	subRepo.AssertNotCalled(t, "Create", mock.Anything, mock.Anything)
 }
 
 func TestActivate_Success(t *testing.T) {

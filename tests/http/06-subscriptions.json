@@ -62,13 +62,13 @@
             },
             "body": {
               "contentType": "application/json",
-              "body": "{\n  \"customer_id\": \"<<customerId>>\",\n  \"plan_id\": \"<<profileId>>\",\n  \"username\": \"testsub2026v1\",\n  \"password\": \"secret123\",\n  \"billing_day\": 1,\n  \"auto_isolate\": true,\n  \"notes\": \"Test subscription\"\n}"
+              "body": "{\n  \"customer_id\": \"<<customerId>>\",\n  \"plan_id\": \"<<profileId>>\",\n  \"username\": \"testsub2026v1\",\n  \"password\": \"secret123\",\n  \"static_ip\": \"10.8.0.50\",\n  \"billing_day\": 1,\n  \"auto_isolate\": true,\n  \"notes\": \"Test subscription\",\n  \"mt_service\": \"pppoe\",\n  \"mt_local_address\": \"10.8.0.1\",\n  \"mt_remote_address\": \"10.8.0.50\",\n  \"mt_comment\": \"HTTP collection test\"\n}"
             },
             "preRequestScript": "",
             "testScript": "",
             "requestVariables": [],
             "responses": {},
-            "description": "Create subscription + PPP secret on MikroTik"
+            "description": "Create subscription + PPP secret on MikroTik (mt_* optional). 409 if username already exists as PPP secret on router. Response may include mikrotik.comment."
           },
           {
             "v": "17",
@@ -111,13 +111,13 @@
             },
             "body": {
               "contentType": "application/json",
-              "body": "{\n  \"plan_id\": \"<<profileId>>\",\n  \"notes\": \"Updated subscription\"\n}"
+              "body": "{\n  \"plan_id\": \"<<profileId>>\",\n  \"notes\": \"Updated subscription\",\n  \"mt_service\": \"pppoe\",\n  \"mt_local_address\": \"10.8.0.1\",\n  \"mt_remote_address\": \"10.8.0.51\",\n  \"mt_comment\": \"updated via HTTP collection\"\n}"
             },
             "preRequestScript": "",
             "testScript": "",
             "requestVariables": [],
             "responses": {},
-            "description": "Update subscription (partial)"
+            "description": "Update subscription (partial). mt_remote_address overrides static_ip on RouterOS when set. 400 if PPP secret not on router."
           },
           {
             "v": "17",

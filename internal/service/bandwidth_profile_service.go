@@ -23,6 +23,8 @@ type PPPProfileConfig struct {
 	DNSServer      *string
 	SessionTimeout *string
 	IdleTimeout    *string
+	// RateLimit overrides model.RateLimit and upload/download-derived limit when set.
+	RateLimit *string
 }
 
 // BandwidthProfileService handles bandwidth profile business logic
@@ -59,8 +61,7 @@ func (s *BandwidthProfileService) Create(ctx context.Context, profile *model.Ban
 		return err
 	}
 
-	// Sync PPP profile to MikroTik
-	if err := s.syncPPPProfile(ctx, mt, profile, mtCfg); err != nil {
+	if err := s.addPPPProfileOnRouter(ctx, mt, profile, mtCfg); err != nil {
 		return fmt.Errorf("failed to sync to mikrotik: %w", err)
 	}
 
@@ -78,50 +79,89 @@ func (s *BandwidthProfileService) Create(ctx context.Context, profile *model.Ban
 	return nil
 }
 
-// syncPPPProfile syncs PPP profile to MikroTik with optional extra fields from mtCfg.
-func (s *BandwidthProfileService) syncPPPProfile(ctx context.Context, mt *mikrotik.Client, profile *model.BandwidthProfile, mtCfg *PPPProfileConfig) error {
-	var rateLimit string
-	if profile.RateLimit != nil && *profile.RateLimit != "" {
-		rateLimit = *profile.RateLimit
-	} else {
-		// auto-compute dari kbps: format upload/download (sama dengan gembok)
-		rateLimit = fmt.Sprintf("%dk/%dk", profile.UploadSpeed, profile.DownloadSpeed)
+func (s *BandwidthProfileService) pppRateLimit(profile *model.BandwidthProfile, mtCfg *PPPProfileConfig) string {
+	if mtCfg != nil && mtCfg.RateLimit != nil && *mtCfg.RateLimit != "" {
+		return *mtCfg.RateLimit
 	}
+	if profile.RateLimit != nil && *profile.RateLimit != "" {
+		return *profile.RateLimit
+	}
+	return fmt.Sprintf("%dk/%dk", profile.UploadSpeed, profile.DownloadSpeed)
+}
 
+// buildPPPProfile builds the RouterOS PPP profile payload (name, rate-limit, local/remote-address, session-timeout, parent-queue, queue-type, dns, idle-timeout).
+func (s *BandwidthProfileService) buildPPPProfile(profile *model.BandwidthProfile, mtCfg *PPPProfileConfig) *mkdomain.PPPProfile {
+	if mtCfg == nil {
+		mtCfg = &PPPProfileConfig{}
+	}
 	pppProfile := &mkdomain.PPPProfile{
 		Name:      profile.Name,
-		RateLimit: rateLimit,
+		RateLimit: s.pppRateLimit(profile, mtCfg),
 	}
-
-	if mtCfg != nil {
-		if mtCfg.LocalAddress != nil {
-			pppProfile.LocalAddress = *mtCfg.LocalAddress
-		}
-		if mtCfg.RemoteAddress != nil {
-			pppProfile.RemoteAddress = *mtCfg.RemoteAddress
-		}
-		if mtCfg.ParentQueue != nil {
-			pppProfile.ParentQueue = *mtCfg.ParentQueue
-		}
-		if mtCfg.QueueType != nil {
-			pppProfile.QueueType = *mtCfg.QueueType
-		}
-		if mtCfg.DNSServer != nil {
-			pppProfile.DNSServer = *mtCfg.DNSServer
-		}
-		if mtCfg.SessionTimeout != nil {
-			pppProfile.SessionTimeout = *mtCfg.SessionTimeout
-		}
-		if mtCfg.IdleTimeout != nil {
-			pppProfile.IdleTimeout = *mtCfg.IdleTimeout
-		}
+	if mtCfg.LocalAddress != nil {
+		pppProfile.LocalAddress = *mtCfg.LocalAddress
 	}
+	if mtCfg.RemoteAddress != nil {
+		pppProfile.RemoteAddress = *mtCfg.RemoteAddress
+	}
+	if mtCfg.ParentQueue != nil {
+		pppProfile.ParentQueue = *mtCfg.ParentQueue
+	}
+	if mtCfg.QueueType != nil {
+		pppProfile.QueueType = *mtCfg.QueueType
+	}
+	if mtCfg.DNSServer != nil {
+		pppProfile.DNSServer = *mtCfg.DNSServer
+	}
+	if mtCfg.SessionTimeout != nil {
+		pppProfile.SessionTimeout = *mtCfg.SessionTimeout
+	}
+	if mtCfg.IdleTimeout != nil {
+		pppProfile.IdleTimeout = *mtCfg.IdleTimeout
+	}
+	return pppProfile
+}
 
-	existing, _ := mt.PPP.GetProfileByName(ctx, profile.Name)
+// addPPPProfileOnRouter creates a PPP profile on the router. Fails if the name already exists (no silent update on create).
+func (s *BandwidthProfileService) addPPPProfileOnRouter(ctx context.Context, mt *mikrotik.Client, profile *model.BandwidthProfile, mtCfg *PPPProfileConfig) error {
+	existing, err := mt.PPP.GetProfileByName(ctx, profile.Name)
+	if err != nil {
+		return fmt.Errorf("mikrotik: lookup ppp profile: %w", err)
+	}
 	if existing != nil {
-		return mt.PPP.UpdateProfile(ctx, existing.ID, pppProfile)
+		return fmt.Errorf("%w: %q", ErrMikrotikPPPProfileExists, profile.Name)
 	}
-	return mt.PPP.AddProfile(ctx, pppProfile)
+	return mt.PPP.AddProfile(ctx, s.buildPPPProfile(profile, mtCfg))
+}
+
+// updatePPPProfileOnRouter updates an existing PPP profile by RouterOS .id (resolved by previous DB name, then new name if renamed).
+func (s *BandwidthProfileService) updatePPPProfileOnRouter(ctx context.Context, mt *mikrotik.Client, dbBefore *model.BandwidthProfile, dbAfter *model.BandwidthProfile, mtCfg *PPPProfileConfig) error {
+	var existing *mkdomain.PPPProfile
+	existing, err := mt.PPP.GetProfileByName(ctx, dbBefore.Name)
+	if err != nil {
+		return fmt.Errorf("mikrotik: lookup ppp profile: %w", err)
+	}
+	if existing == nil && dbBefore.Name != dbAfter.Name {
+		existing, err = mt.PPP.GetProfileByName(ctx, dbAfter.Name)
+		if err != nil {
+			return fmt.Errorf("mikrotik: lookup ppp profile: %w", err)
+		}
+	}
+	if existing == nil {
+		return fmt.Errorf("%w: %q", ErrMikrotikPPPProfileNotFound, dbBefore.Name)
+	}
+	ppp := s.buildPPPProfile(dbAfter, mtCfg)
+	return mt.PPP.UpdateProfile(ctx, existing.ID, ppp)
+}
+
+// rollbackPPPProfileAfterFailedDB reverts RouterOS state after a failed DB write. nameOnRouter is the profile name currently on the router (after a failed update, usually dbAfter.Name).
+func (s *BandwidthProfileService) rollbackPPPProfileAfterFailedDB(ctx context.Context, mt *mikrotik.Client, nameOnRouter string, backTo *model.BandwidthProfile, mtCfg *PPPProfileConfig) error {
+	existing, err := mt.PPP.GetProfileByName(ctx, nameOnRouter)
+	if err != nil || existing == nil {
+		return nil
+	}
+	ppp := s.buildPPPProfile(backTo, mtCfg)
+	return mt.PPP.UpdateProfile(ctx, existing.ID, ppp)
 }
 
 // GetByID gets profile by ID with cache-aside.
@@ -212,15 +252,13 @@ func (s *BandwidthProfileService) Update(ctx context.Context, profile *model.Ban
 		return err
 	}
 
-	// Sync PPP profile to MikroTik
-	if err := s.syncPPPProfile(ctx, mt, profile, mtCfg); err != nil {
+	if err := s.updatePPPProfileOnRouter(ctx, mt, existingProfile, profile, mtCfg); err != nil {
 		return fmt.Errorf("failed to sync to mikrotik: %w", err)
 	}
 
 	// Update database only if MikroTik succeeded
 	if err := s.profileRepo.Update(ctx, profile); err != nil {
-		// Rollback: restore old profile in MikroTik (no extra MikroTik opts for rollback)
-		_ = s.syncPPPProfile(ctx, mt, existingProfile, &PPPProfileConfig{})
+		_ = s.rollbackPPPProfileAfterFailedDB(ctx, mt, profile.Name, existingProfile, &PPPProfileConfig{})
 		return err
 	}
 

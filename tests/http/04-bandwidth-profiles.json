@@ -58,13 +58,13 @@
         },
         "body": {
           "contentType": "application/json",
-          "body": "{\n  \"profile_code\": \"20M\",\n  \"name\": \"20 Mbps\",\n  \"description\": \"Paket 30 Mbps\",\n  \"price_monthly\": 250000,\n  \"download_speed\": 30000000,\n  \"upload_speed\": 15000000,\n  \"tax_rate\": 0.11,\n  \"billing_cycle\": \"monthly\",\n  \"billing_day\": 1,\n  \"grace_period_days\": 3,\n  \"sort_order\": 3,\n  \"is_visible\": true,\n  \"router_id\": \"9eab7675-3abd-41df-97fc-1c8137367f5a\"\n}"
+          "body": "{\n  \"profile_code\": \"20M\",\n  \"name\": \"20 Mbps\",\n  \"description\": \"Paket 20 Mbps contoh\",\n  \"price_monthly\": 250000,\n  \"download_speed\": 30000000,\n  \"upload_speed\": 15000000,\n  \"tax_rate\": 0.11,\n  \"billing_cycle\": \"monthly\",\n  \"billing_day\": 1,\n  \"grace_period_days\": 3,\n  \"sort_order\": 3,\n  \"is_visible\": true,\n  \"rate_limit\": \"10M/20M\",\n  \"mt_local_address\": \"10.10.0.1\",\n  \"mt_remote_address\": \"10.10.100.0/24\",\n  \"mt_session_timeout\": \"1d\",\n  \"mt_idle_timeout\": \"5m\",\n  \"mt_parent_queue\": \"default\",\n  \"mt_queue_type\": \"default\",\n  \"mt_dns_server\": \"8.8.8.8\"\n}"
         },
         "preRequestScript": "",
         "testScript": "",
         "requestVariables": [],
         "responses": {},
-        "description": "Create bandwidth profile + sync to MikroTik PPP profile"
+        "description": "Create bandwidth profile + PPP profile on MikroTik (rate_limit, mt_* optional). 409 if PPP profile name already exists on router."
       },
       {
         "v": "17",
@@ -107,13 +107,13 @@
         },
         "body": {
           "contentType": "application/json",
-          "body": "{\n  \"name\": \"10 Mbps Updated\",\n  \"price_monthly\": 175000,\n  \"download_speed\": 12000000,\n  \"upload_speed\": 6000000\n}"
+          "body": "{\n  \"name\": \"10 Mbps Updated\",\n  \"price_monthly\": 175000,\n  \"download_speed\": 12000000,\n  \"upload_speed\": 6000000,\n  \"rate_limit\": \"6M/12M\",\n  \"mt_rate_limit\": \"6M/12M\",\n  \"mt_local_address\": \"10.10.0.1\",\n  \"mt_session_timeout\": \"1d\",\n  \"mt_parent_queue\": \"default\",\n  \"mt_queue_type\": \"default\"\n}"
         },
         "preRequestScript": "",
         "testScript": "",
         "requestVariables": [],
         "responses": {},
-        "description": "Update bandwidth profile (partial)"
+        "description": "Update bandwidth profile (partial). Optional rate_limit, mt_rate_limit, mt_* for RouterOS PPP profile. 400 if profile missing on router."
       },
       {
         "v": "17",

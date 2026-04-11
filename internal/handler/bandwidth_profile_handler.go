@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -52,9 +53,14 @@ func (h *BandwidthProfileHandler) Create(c *gin.Context) {
 		DNSServer:      req.MtDNSServer,
 		SessionTimeout: req.MtSessionTimeout,
 		IdleTimeout:    req.MtIdleTimeout,
+		RateLimit:      req.MtRateLimit,
 	}
 
 	if err := h.service.Create(c.Request.Context(), profile, mtCfg); err != nil {
+		if errors.Is(err, service.ErrMikrotikPPPProfileExists) {
+			response.Conflict(c, err.Error())
+			return
+		}
 		response.Error(c, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -128,9 +134,14 @@ func (h *BandwidthProfileHandler) Update(c *gin.Context) {
 		DNSServer:      req.MtDNSServer,
 		SessionTimeout: req.MtSessionTimeout,
 		IdleTimeout:    req.MtIdleTimeout,
+		RateLimit:      req.MtRateLimit,
 	}
 
 	if err := h.service.Update(c.Request.Context(), profile, mtCfg); err != nil {
+		if errors.Is(err, service.ErrMikrotikPPPProfileNotFound) {
+			response.Error(c, http.StatusBadRequest, err.Error())
+			return
+		}
 		response.InternalServerError(c, err.Error())
 		return
 	}
