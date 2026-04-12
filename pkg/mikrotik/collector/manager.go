@@ -6,9 +6,10 @@ import (
 	"sync"
 
 	"github.com/Butterfly-Student/go-ros/client"
-	"mikmongo/pkg/mikrotik/collector/pipeline/ondemand"
-	"mikmongo/pkg/mikrotik/collector/pool"
-	"mikmongo/pkg/mikrotik/collector/writer"
+	"github.com/Butterfly-Student/go-ros/collector/pipeline/ondemand"
+	"github.com/Butterfly-Student/go-ros/collector/pool"
+	"github.com/Butterfly-Student/go-ros/collector/writer"
+	"github.com/Butterfly-Student/go-ros/spec"
 )
 
 // Config untuk Manager
@@ -62,8 +63,8 @@ func NewManager(cfg ManagerConfig) (*Manager, error) {
 func (m *Manager) AddRouter(
 	routerID string,
 	routerCfg client.Config,
-	timeSeriesSpecs []CommandSpec,
-	operationalSpecs []CommandSpec,
+	timeSeriesSpecs []spec.CommandSpec,
+	operationalSpecs []spec.CommandSpec,
 ) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()

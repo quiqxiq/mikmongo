@@ -7,16 +7,16 @@ import (
 	"sync"
 	"time"
 
-	"mikmongo/pkg/mikrotik/collector"
-	"mikmongo/pkg/mikrotik/collector/pool"
-	"mikmongo/pkg/mikrotik/collector/writer"
+	"github.com/Butterfly-Student/go-ros/collector/pool"
+	"github.com/Butterfly-Student/go-ros/collector/writer"
+	"github.com/Butterfly-Student/go-ros/spec"
 )
 
 // Tier2Collector handles event-driven state collection (follow=yes)
 type Tier2Collector struct {
 	routerID    string
 	pool        *pool.ConnPool
-	specs       []collector.CommandSpec
+	specs       []spec.CommandSpec
 	batchWriter *writer.BatchWriter
 	
 	// Fan-in channel
@@ -30,7 +30,7 @@ type Tier2Collector struct {
 // StateEvent adalah state change event
 type StateEvent struct {
 	RouterID  string
-	Spec      collector.CommandSpec
+	Spec      spec.CommandSpec
 	Key       string
 	Data      map[string]string
 	Timestamp time.Time
@@ -38,7 +38,7 @@ type StateEvent struct {
 }
 
 // NewTier2Collector creates new Tier 2 collector
-func NewTier2Collector(routerID string, p *pool.ConnPool, specs []collector.CommandSpec, bw *writer.BatchWriter) *Tier2Collector {
+func NewTier2Collector(routerID string, p *pool.ConnPool, specs []spec.CommandSpec, bw *writer.BatchWriter) *Tier2Collector {
 	return &Tier2Collector{
 		routerID:    routerID,
 		pool:        p,
@@ -73,7 +73,7 @@ func (c *Tier2Collector) Stop() {
 }
 
 // collectSpec collects state untuk satu spec dengan follow=yes
-func (c *Tier2Collector) collectSpec(spec collector.CommandSpec) {
+func (c *Tier2Collector) collectSpec(spec spec.CommandSpec) {
 	defer c.wg.Done()
 	
 	// Acquire connection dari pool

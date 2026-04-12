@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/Butterfly-Student/go-ros/client"
-	"mikmongo/pkg/mikrotik"
+	"github.com/Butterfly-Student/go-ros"
 )
 
 // PoolType identifies which pipeline this pool serves

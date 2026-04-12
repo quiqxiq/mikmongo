@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/Butterfly-Student/go-ros/client"
-	"mikmongo/pkg/mikrotik/collector/pool"
-	"mikmongo/pkg/mikrotik/collector/writer"
+	"github.com/Butterfly-Student/go-ros/collector/pool"
+	"github.com/Butterfly-Student/go-ros/collector/writer"
 )
 
 // Runner handles on-demand operations (read/write langsung ke router)

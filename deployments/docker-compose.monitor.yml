@@ -10,6 +10,7 @@ services:
       - --node-id=node0
       - --object-store=file
       - --data-dir=/var/lib/influxdb3/data
+      - --disable-authz=health
     volumes:
       - ./influxdb3_data:/var/lib/influxdb3/data # bind mount — avoids named volume permission issues
     restart: unless-stopped

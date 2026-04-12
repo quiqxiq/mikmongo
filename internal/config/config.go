@@ -65,6 +65,12 @@ type Config struct {
 		GroupID  string
 		Timeout  int
 	}
+	InfluxDB struct {
+		URL    string
+		Token  string
+		Org    string
+		Bucket string
+	}
 	InternalKey string
 	Seed        struct {
 		AutoMigrate    bool
@@ -141,6 +147,12 @@ func Load() *Config {
 	config.GoWA.DeviceID = os.Getenv("GOWA_DEVICE_ID")
 	config.GoWA.GroupID = os.Getenv("GOWA_GROUP_ID")
 	config.GoWA.Timeout = envInt("GOWA_TIMEOUT", 30)
+
+	// InfluxDB
+	config.InfluxDB.URL = env("INFLUXDB_URL", "http://localhost:8086")
+	config.InfluxDB.Token = os.Getenv("INFLUXDB_TOKEN")
+	config.InfluxDB.Org = env("INFLUXDB_ORG", "mikmongo")
+	config.InfluxDB.Bucket = env("INFLUXDB_BUCKET", "mikrotik")
 
 	// Internal key for WebSocket auth bypass
 	config.InternalKey = env("INTERNAL_KEY", "")

@@ -9,16 +9,16 @@ import (
 	"sync"
 	"time"
 
-	"mikmongo/pkg/mikrotik/collector"
-	"mikmongo/pkg/mikrotik/collector/pool"
-	"mikmongo/pkg/mikrotik/collector/writer"
+	"github.com/Butterfly-Student/go-ros/collector/pool"
+	"github.com/Butterfly-Student/go-ros/collector/writer"
+	"github.com/Butterfly-Student/go-ros/spec"
 )
 
 // Collector handles time-series metrics collection
 type Collector struct {
 	routerID    string
 	pool        *pool.ConnPool
-	specs       []collector.CommandSpec
+	specs       []spec.CommandSpec
 	batchWriter *writer.BatchWriter
 	
 	// Fan-in channel untuk semua metrics
@@ -32,13 +32,13 @@ type Collector struct {
 // MetricEvent adalah event dari RouterOS
 type MetricEvent struct {
 	RouterID    string
-	Spec        collector.CommandSpec
+	Spec        spec.CommandSpec
 	Timestamp   time.Time
 	Data        map[string]string
 }
 
 // NewCollector creates new time-series collector
-func NewCollector(routerID string, p *pool.ConnPool, specs []collector.CommandSpec, bw *writer.BatchWriter) *Collector {
+func NewCollector(routerID string, p *pool.ConnPool, specs []spec.CommandSpec, bw *writer.BatchWriter) *Collector {
 	return &Collector{
 		routerID:    routerID,
 		pool:        p,
@@ -73,7 +73,7 @@ func (c *Collector) Stop() {
 }
 
 // collectSpec collects data untuk satu spec
-func (c *Collector) collectSpec(spec collector.CommandSpec) {
+func (c *Collector) collectSpec(cs spec.CommandSpec) {
 	defer c.wg.Done()
 	
 	// Acquire connection dari pool
@@ -91,15 +91,15 @@ func (c *Collector) collectSpec(spec collector.CommandSpec) {
 	resultCh := make(chan map[string]string, 100)
 	
 	// Start listening
-	stopListen, err := conn.Client.ListenRaw(ctx, spec.Args, resultCh)
+	stopListen, err := conn.Client.ListenRaw(ctx, cs.Args, resultCh)
 	if err != nil {
-		log.Printf("[TimeSeriesCollector %s] Failed to start listener for %s: %v", c.routerID, spec.Name, err)
+		log.Printf("[TimeSeriesCollector %s] Failed to start listener for %s: %v", c.routerID, cs.Name, err)
 		return
 	}
 	defer stopListen()
-	
+
 	conn.IncrementCommand()
-	log.Printf("[TimeSeriesCollector %s] Started collecting %s", c.routerID, spec.Name)
+	log.Printf("[TimeSeriesCollector %s] Started collecting %s", c.routerID, cs.Name)
 	
 	for {
 		select {
@@ -115,7 +115,7 @@ func (c *Collector) collectSpec(spec collector.CommandSpec) {
 			// Send ke fan-in channel
 			c.metricsCh <- MetricEvent{
 				RouterID:  c.routerID,
-				Spec:      spec,
+				Spec:      cs,
 				Timestamp: time.Now(),
 				Data:      data,
 			}
@@ -161,8 +161,8 @@ func (c *Collector) eventToWriteItem(event MetricEvent) writer.WriteItem {
 }
 
 // parseData extracts tags dan fields dari RouterOS data
-func (c *Collector) parseData(data map[string]string, tagFields, valueFields []string) (tags, fields map[string]interface{}) {
-	tags = make(map[string]interface{})
+func (c *Collector) parseData(data map[string]string, tagFields, valueFields []string) (tags map[string]string, fields map[string]interface{}) {
+	tags = make(map[string]string)
 	fields = make(map[string]interface{})
 	
 	// Extract tags
@@ -211,7 +211,6 @@ func (c *Collector) GetStats() map[string]interface{} {
 	}
 }
 
-import "fmt"
 
 // formatFieldName normalizes field name untuk InfluxDB
 func formatFieldName(name string) string {

@@ -7,16 +7,16 @@ import (
 	"sync"
 	"time"
 
-	"mikmongo/pkg/mikrotik/collector"
-	"mikmongo/pkg/mikrotik/collector/pool"
-	"mikmongo/pkg/mikrotik/collector/writer"
+	"github.com/Butterfly-Student/go-ros/collector/pool"
+	"github.com/Butterfly-Student/go-ros/collector/writer"
+	mtspec "github.com/Butterfly-Student/go-ros/spec"
 )
 
 // Tier3Collector handles static data collection dengan ticker
 type Tier3Collector struct {
 	routerID    string
 	pool        *pool.ConnPool
-	specs       []collector.CommandSpec
+	specs       []mtspec.CommandSpec
 	batchWriter *writer.BatchWriter
 	
 	// Control
@@ -25,7 +25,7 @@ type Tier3Collector struct {
 }
 
 // NewTier3Collector creates new Tier 3 collector
-func NewTier3Collector(routerID string, p *pool.ConnPool, specs []collector.CommandSpec, bw *writer.BatchWriter) *Tier3Collector {
+func NewTier3Collector(routerID string, p *pool.ConnPool, specs []mtspec.CommandSpec, bw *writer.BatchWriter) *Tier3Collector {
 	return &Tier3Collector{
 		routerID:    routerID,
 		pool:        p,
@@ -54,7 +54,7 @@ func (c *Tier3Collector) Stop() {
 }
 
 // runTicker runs ticker untuk satu spec
-func (c *Tier3Collector) runTicker(spec collector.CommandSpec) {
+func (c *Tier3Collector) runTicker(spec mtspec.CommandSpec) {
 	defer c.wg.Done()
 	
 	// Initial fetch
@@ -83,7 +83,7 @@ func (c *Tier3Collector) runTicker(spec collector.CommandSpec) {
 }
 
 // fetchAndCache fetches data dari RouterOS dan cache ke Redis
-func (c *Tier3Collector) fetchAndCache(spec collector.CommandSpec) {
+func (c *Tier3Collector) fetchAndCache(spec mtspec.CommandSpec) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 	

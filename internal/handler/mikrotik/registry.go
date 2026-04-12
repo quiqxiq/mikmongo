@@ -1,6 +1,7 @@
 package mikrotik
 
 import (
+	goredis "github.com/redis/go-redis/v9"
 	"mikmongo/internal/service"
 	svcmikrotik "mikmongo/internal/service/mikrotik"
 )
@@ -17,10 +18,13 @@ type Registry struct {
 	Monitor   *MonitorHandler
 	MonitorWS *MonitorWSHandler
 	Raw       *RawHandler
+	Cached          *CachedHandler
+	Log             *LogHandler
+	CollectorStatus *CollectorStatusHandler
 }
 
 // NewRegistry creates a new MikroTik handler registry.
-func NewRegistry(mkRegistry *svcmikrotik.Registry, routerSvc *service.RouterService) *Registry {
+func NewRegistry(mkRegistry *svcmikrotik.Registry, routerSvc *service.RouterService, rdb *goredis.Client) *Registry {
 	return &Registry{
 		PPP:       NewPPPHandler(mkRegistry.PPP),
 		PPPWS:     NewPPPWSHandler(routerSvc),
@@ -32,5 +36,7 @@ func NewRegistry(mkRegistry *svcmikrotik.Registry, routerSvc *service.RouterServ
 		Monitor:   NewMonitorHandler(mkRegistry.Monitor),
 		MonitorWS: NewMonitorWSHandler(routerSvc),
 		Raw:       NewRawHandler(routerSvc),
+		Cached:    NewCachedHandler(rdb),
+		Log:       NewLogHandler(rdb),
 	}
 }

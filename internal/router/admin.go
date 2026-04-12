@@ -87,6 +87,7 @@ func registerAdminRoutes(v1 *gin.RouterGroup, handlers *handler.Registry) {
 			mikrotikRouter.RegisterHotspotRoutes(router, handlers)
 			mikrotikRouter.RegisterNetworkRoutes(router, handlers)
 			mikrotikRouter.RegisterMonitorRoutes(router, handlers)
+			mikrotikRouter.RegisterCollectorRoutes(router, handlers)
 			mikrotikRouter.RegisterRawRoutes(router, handlers)
 		}
 	}

@@ -49,6 +49,12 @@ func (c *Client) HealthCheck(ctx context.Context) error {
 	return c.client.Ping(ctx).Err()
 }
 
+// GoRedis returns the underlying go-redis client for direct operations
+// such as HGETALL, XREVRANGE, etc.
+func (c *Client) GoRedis() *redis.Client {
+	return c.client
+}
+
 // FlushDB removes all keys from the current database. Use only in tests.
 func (c *Client) FlushDB(ctx context.Context) error {
 	return c.client.FlushDB(ctx).Err()

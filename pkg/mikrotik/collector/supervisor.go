@@ -2,16 +2,16 @@
 package collector
 
 import (
-	"context"
 	"log"
 	"sync"
 	"time"
 
 	"github.com/Butterfly-Student/go-ros/client"
-	"mikmongo/pkg/mikrotik/collector/pipeline/operational"
-	"mikmongo/pkg/mikrotik/collector/pipeline/time_series"
-	"mikmongo/pkg/mikrotik/collector/pool"
-	"mikmongo/pkg/mikrotik/collector/writer"
+	"github.com/Butterfly-Student/go-ros/collector/pipeline/operational"
+	"github.com/Butterfly-Student/go-ros/collector/pipeline/time_series"
+	"github.com/Butterfly-Student/go-ros/collector/pool"
+	"github.com/Butterfly-Student/go-ros/collector/writer"
+	"github.com/Butterfly-Student/go-ros/spec"
 )
 
 // Supervisor monitors collectors dan auto-restart jika failure
@@ -27,8 +27,8 @@ type Supervisor struct {
 	batchWriter       *writer.BatchWriter
 	
 	// Specs
-	timeSeriesSpecs   []CommandSpec
-	operationalSpecs  []CommandSpec
+	timeSeriesSpecs   []spec.CommandSpec
+	operationalSpecs  []spec.CommandSpec
 	
 	// Collectors
 	tsCollector       *time_series.Collector
@@ -63,7 +63,7 @@ func DefaultSupervisorConfig() SupervisorConfig {
 func NewSupervisor(
 	routerID string,
 	routerCfg client.Config,
-	timeSeriesSpecs, operationalSpecs []CommandSpec,
+	timeSeriesSpecs, operationalSpecs []spec.CommandSpec,
 	batchWriter *writer.BatchWriter,
 	config SupervisorConfig,
 ) (*Supervisor, error) {
@@ -113,8 +113,8 @@ func (s *Supervisor) Start() error {
 	}
 	
 	// Filter operational specs by tier
-	tier2Specs := FilterByTier(s.operationalSpecs, Tier2)
-	tier3Specs := FilterByTier(s.operationalSpecs, Tier3)
+	tier2Specs := spec.FilterByTier(s.operationalSpecs, spec.Tier2)
+	tier3Specs := spec.FilterByTier(s.operationalSpecs, spec.Tier3)
 	
 	// Start Tier 2 collector (follow=yes)
 	if len(tier2Specs) > 0 {
@@ -244,8 +244,8 @@ func (s *Supervisor) RestartCollector(pipeline string) error {
 		}
 		s.operationalPool = newPool
 		
-		tier2Specs := FilterByTier(s.operationalSpecs, Tier2)
-		tier3Specs := FilterByTier(s.operationalSpecs, Tier3)
+		tier2Specs := spec.FilterByTier(s.operationalSpecs, spec.Tier2)
+		tier3Specs := spec.FilterByTier(s.operationalSpecs, spec.Tier3)
 		
 		if len(tier2Specs) > 0 {
 			s.tier2Collector = operational.NewTier2Collector(s.routerID, newPool, tier2Specs, s.batchWriter)

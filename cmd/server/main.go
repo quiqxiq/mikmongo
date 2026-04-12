@@ -230,8 +230,20 @@ func main() {
 	handlerRegistry.CustomerPortal.SetProvider("xendit", xenditClient)
 	handlerRegistry.Webhook.SetXenditProvider(xenditClient)
 
+	// Collector Service
+	collectorSvc := service.NewCollectorService(
+		serviceRegistry.Router,
+		cfg.Redis.Host+":"+cfg.Redis.Port,
+		cfg.InfluxDB.URL,
+		cfg.InfluxDB.Token,
+		cfg.InfluxDB.Org,
+		cfg.InfluxDB.Bucket,
+		logg.Logger,
+	)
+
 	// Initialize MikroTik handler registry
-	handlerRegistry.Mikrotik = mikrotikHandler.NewRegistry(mikrotikRegistry, serviceRegistry.Router)
+	handlerRegistry.Mikrotik = mikrotikHandler.NewRegistry(mikrotikRegistry, serviceRegistry.Router, redisClient.GoRedis())
+	handlerRegistry.Mikrotik.CollectorStatus = &mikrotikHandler.CollectorStatusHandler{CollectorSvc: collectorSvc}
 	handlerRegistry.Mikhmon = mikhmon.NewRegistry(mikrotikRegistry)
 
 	// Initialize HotspotSale + SalesAgent handlers
@@ -268,6 +280,14 @@ func main() {
 		Addr:    ":" + cfg.App.Port,
 		Handler: r,
 	}
+
+	// Start collector in background
+	go func() {
+		if err := collectorSvc.Start(context.Background()); err != nil {
+			logg.Error("Collector failed to start", zap.Error(err))
+		}
+	}()
+	defer collectorSvc.Stop()
 
 	go func() {
 		logg.Info("Server starting", zap.String("address", srv.Addr))
