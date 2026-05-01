@@ -63,11 +63,11 @@ The web UI is maintained in a separate repository. This repository contains back
 
 ```bash
 # 1. Clone the repository
-git clone <repo-url> && cd mikmongo-fully
+git clone <repo-url> && cd mikmongo
 
 # 2. Configure environment
 cp .env.example .env
-# Edit .env with your database, Redis, RabbitMQ, MikroTik, and Xendit credentials
+# Edit .env with your database, Redis, RabbitMQ, MikroTik, InfluxDB, and Xendit credentials
 
 # 3. Start infrastructure services
 docker-compose -f deployments/docker-compose.yml up -d
@@ -129,21 +129,20 @@ These match the defaults in `.env.example`, so local development works without c
 ## Project Structure
 
 ```
-mikmongo-fully/
+mikmongo/
 ├── cmd/                        # Application entry points
 │   ├── server/                 # Main API server
 │   ├── seed/                   # Database seeder
 │   ├── migrate/                # Standalone migration runner
-│   ├── collector/              # InfluxDB metrics collector
 │   ├── mikrotik/               # MikroTik CLI tools
-│   ├── collector_test/         # Collector test runner
 │   └── full_test/              # Full stack test runner
 ├── internal/                   # Private application code
 │   ├── casbin/                 # RBAC policy definitions
-│   ├── collector/              # InfluxDB metric collection
+│   ├── collector/              # Collector service orchestration
 │   ├── config/                 # Configuration loading
 │   ├── domain/                 # Domain logic modules
 │   ├── dto/                    # Data transfer objects
+│   │   └── mikrotik/           # MikroTik request/response DTOs
 │   ├── handler/                # HTTP handlers (Gin controllers)
 │   │   └── mikrotik/           # MikroTik-specific handlers
 │   ├── middleware/             # HTTP middleware (auth, logging, CORS)
@@ -165,6 +164,7 @@ mikmongo-fully/
 │   ├── jwt/                    # JWT token utilities
 │   ├── logger/                 # Zap logger setup
 │   ├── mikrotik/               # MikroTik RouterOS SDK
+│   │   ├── collector/          # Tier 1/2/3 collector pipeline
 │   │   └── domain/             # RouterOS entity definitions
 │   ├── pagination/             # Cursor/offset pagination
 │   ├── payment/                # Xendit payment integration
@@ -175,16 +175,19 @@ mikmongo-fully/
 │   └── ws/                     # WebSocket utilities
 ├── tests/                      # Integration and HTTP tests
 │   ├── http/                   # HTTP handler tests
-│   ├── integration/            # Integration tests
+│   ├── integration/            # Integration tests (build tag: integration)
 │   └── mocks/                  # Generated mocks
 ├── deployments/                # Infrastructure configuration
 │   ├── docker-compose.yml      # Development services
-│   ├── docker-compose.monitor.yml # Monitoring stack
+│   ├── docker-compose.monitor.yml # Monitoring stack (InfluxDB, Grafana)
+│   ├── mikrotik-test/          # RouterOS test container
 │   ├── Dockerfile              # Multi-stage Go build
 │   └── nginx.conf              # Reverse proxy config
 ├── docs/                       # Documentation
-│   └── openapi.docs.yml        # OpenAPI specification
-├── utils/                      # Utility scripts
+│   ├── openapi.docs.yml        # OpenAPI 3 specification
+│   ├── COLLECTOR_V2_ARCHITECTURE.md
+│   └── COLLECTOR_IMPLEMENTATION_GUIDE.md
+├── utils/                      # Shared utilities (encryption, etc.)
 ├── Makefile                    # Build and code generation targets
 ├── go.mod
 └── .env.example                # Environment template
@@ -246,31 +249,61 @@ An OpenAPI specification is available at `docs/openapi.docs.yml`. Import it into
 
 ### API Route Groups
 
-The backend exposes three route groups:
+The backend exposes four route groups, each with its own auth scope:
 
 | Group | Prefix | Auth | Description |
 |---|---|---|---|
-| Admin | `/api/v1/admin/` | JWT + Casbin RBAC | Full admin dashboard API |
-| Agent Portal | `/api/v1/agent/` | JWT | Sales agent self-service endpoints |
-| Customer Portal | `/api/v1/customer/` | JWT | Customer self-service endpoints |
-| Public | `/api/v1/` | Mixed | Auth, registration, webhooks |
+| Public | `/api/v1/auth/*`, `/api/v1/register`, `/api/v1/webhooks/*`, `/health` | None / Webhook signature | Login, registration, payment webhooks |
+| Admin API | `/api/v1/*` | JWT + Casbin RBAC (`mw.Auth.Authenticate` → `mw.RBAC`) | Full admin/operator dashboard API |
+| Customer Portal | `/portal/v1/*` | JWT (`mw.PortalAuth.AuthenticatePortal`) | Customer self-service (profile, invoices, payments) |
+| Agent Portal | `/agent-portal/v1/*` | JWT (`mw.AgentPortalAuth.AuthenticateAgentPortal`) | Sales agent self-service |
 
 ### Key Endpoints
 
 | Area | Endpoints |
 |---|---|
-| Auth | `POST /login`, `POST /refresh`, `POST /logout` |
-| Customers | CRUD `/admin/customers` |
-| Subscriptions | CRUD `/admin/subscriptions` |
-| Invoices | CRUD `/admin/invoices`, generation, listing |
-| Payments | CRUD `/admin/payments`, Xendit webhooks |
-| Routers | CRUD `/admin/routers`, status checks |
-| Bandwidth | CRUD `/admin/bandwidth-profiles` |
-| Agents | CRUD `/admin/agents`, agent portal endpoints |
-| Reports | GET `/admin/reports/*` (financial, operational) |
-| Hotspot Sales | CRUD `/admin/hotspot-sales` |
-| Settings | GET/PUT `/admin/settings` |
-| Webhooks | `POST /webhooks/xendit` (Xendit payment callbacks) |
+| Auth | `POST /api/v1/auth/login`, `POST /api/v1/auth/refresh`, `POST /api/v1/auth/logout`, `GET /api/v1/auth/me` |
+| Users | CRUD `/api/v1/users` |
+| Customers | CRUD `/api/v1/customers`, `POST /:id/activate-account`, `POST /:id/deactivate-account` |
+| Routers | CRUD `/api/v1/routers`, `POST /:id/sync`, `POST /:id/test-connection`, `POST /routers/sync-all` |
+| Subscriptions | CRUD `/api/v1/routers/:router_id/subscriptions`, activate/suspend/isolate/restore/terminate |
+| Bandwidth Profiles | CRUD `/api/v1/routers/:router_id/bandwidth-profiles` |
+| Invoices | `GET /api/v1/invoices`, `GET /overdue`, `POST /trigger-monthly` |
+| Payments | CRUD `/api/v1/payments`, `POST /:id/confirm`, `POST /:id/reject`, `POST /:id/refund`, `POST /:id/initiate-gateway` |
+| Registrations | `GET /api/v1/registrations`, `POST /:id/approve`, `POST /:id/reject` |
+| Sales Agents | CRUD `/api/v1/sales-agents`, profile-prices, per-agent invoices |
+| Agent Invoices | CRUD `/api/v1/agent-invoices`, `PUT /:id/pay`, `PUT /:id/cancel`, `POST /process` |
+| Hotspot Sales | `GET /api/v1/routers/:router_id/hotspot-sales` |
+| Cash Management | CRUD `/api/v1/cash-entries`, approve/reject; CRUD `/api/v1/petty-cash`, topup |
+| Reports | `GET /api/v1/reports/{summary,subscriptions,cash-flow,cash-balance,reconciliation}` |
+| Settings | `GET/PUT /api/v1/settings` |
+| MikroTik PPP | `/api/v1/routers/:router_id/ppp/{profiles,secrets,active}` (+ WebSocket streams) |
+| MikroTik Hotspot | `/api/v1/routers/:router_id/hotspot/{profiles,users,active,hosts,servers}` (+ WS) |
+| MikroTik Network | `/api/v1/routers/:router_id/{queue,firewall,ip}/*` |
+| MikroTik Monitor | `/api/v1/routers/:router_id/monitor/{system-resource,interfaces}` (+ WS traffic/logs/ping) |
+| MikroTik Mikhmon | `/api/v1/routers/:router_id/mikhmon/{vouchers,profiles,reports,expire}` |
+| **Collector (cached reads)** | `GET /api/v1/routers/:router_id/cached/{ppp-active,hotspot-active,ppp-secrets,queue-stats}`, `GET /logs`, `GET /collector/status` |
+| MikroTik Raw | `POST /api/v1/routers/:router_id/raw/run`, WS `/raw/ws/listen` |
+| Webhooks | `POST /api/v1/webhooks/xendit`, `POST /api/v1/webhooks/midtrans` |
+| Customer Portal | `/portal/v1/{login,profile,subscriptions,invoices,payments}` |
+| Agent Portal | `/agent-portal/v1/{login,profile,invoices,sales}` |
+
+## Data Collection Architecture
+
+MikMongo separates live RouterOS API calls from cached reads using a tiered collector pipeline. This reduces load on MikroTik devices and provides sub-second response times for dashboard queries.
+
+```
+RouterOS device ──(poll)──> Collector (Tier 1/2/3) ──> Redis (streams + hashes) ──> /cached/* HTTP handlers
+                                                  ╰──> InfluxDB 3 Core (time-series metrics)
+```
+
+- **Tier 1** (`pkg/mikrotik/collector/pipeline/time_series`) — high-frequency metrics written to InfluxDB (bandwidth, CPU, memory)
+- **Tier 2** (`pkg/mikrotik/collector/pipeline/operational/tier2_collector.go`) — operational snapshots (PPP active, hotspot active) cached in Redis hashes
+- **Tier 3** (`pkg/mikrotik/collector/pipeline/operational/tier3_collector.go`) — low-frequency config (PPP secrets, queue configs) cached in Redis
+
+Handlers under `/api/v1/routers/:router_id/cached/*` read directly from Redis, never touching the router. Router logs are tailed into a Redis Stream and exposed via `GET /logs`. The collector status endpoint reports pipeline health, last sync time, and error counts.
+
+See `docs/COLLECTOR_V2_ARCHITECTURE.md` and `docs/COLLECTOR_IMPLEMENTATION_GUIDE.md` for the full design and operational runbook.
 
 ## Development Guide
 

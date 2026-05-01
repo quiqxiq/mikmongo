@@ -17,9 +17,9 @@ func (s *Seeder) seedUsers(ctx context.Context) error {
 	}{
 		{"Super Admin", "superadmin@mikmongo.local", "+6280000000001", "admin123!", "superadmin"},
 		{"Admin", "admin@mikmongo.local", "+6280000000002", "Admin123!", "admin"},
-		{"Customer Service", "cs@mikmongo.local", "+6280000000003", "Cs123!", "cs"},
-		{"Billing", "billing@mikmongo.local", "+6280000000004", "Billing123!", "billing"},
-		{"Technician", "technician@mikmongo.local", "+6280000000005", "Tech123!", "technician"},
+		{"Technician", "technician@mikmongo.local", "+6280000000003", "Tech123!", "technician"},
+		{"Sales Agent", "salesagent@mikmongo.local", "+6280000000004", "Sales123!", "sales_agent"},
+		{"Customer", "customer@mikmongo.local", "+6280000000005", "Cust123!", "customer"},
 	}
 
 	for _, u := range users {

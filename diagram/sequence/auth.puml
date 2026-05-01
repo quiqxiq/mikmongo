@@ -1,0 +1,75 @@
+@startuml
+!theme mars
+autonumber
+skinparam sequenceMessageAlign center
+
+' Definisi Partisipan
+actor "Admin/Teknisi" as User
+boundary "Login Page" as UI
+boundary "Dashboard" as Dash
+control "Sistem (Backend)" as System
+database "Database(users)" as DB
+
+User -> UI : 1. Input username & password
+activate UI
+
+' Validasi awal di sisi client
+UI -> UI : 2. Validasi format input
+UI -> System : 3. Kirim Request Login (POST /auth/login)
+deactivate UI
+activate System
+
+' Cek ke Database
+System -> DB : 4. Cek User (SELECT by username)
+activate DB
+DB --> System : 5. Return Data User
+deactivate DB
+
+alt User Ditemukan & Password Valid
+    System -> System : 6. Generate JWT Token
+    System -> DB : 7. Update last_login
+    activate DB
+    DB --> System : 8. Update Berhasil
+    deactivate DB
+    
+    System --> UI : 9. Return {success: true, token, user}
+    deactivate System
+    activate UI
+    
+    ' Redirect ke Dashboard
+    UI -> Dash : 10. Redirect + Bearer Token
+    deactivate UI
+    activate Dash
+    
+    Dash --> User : 11. Tampilkan Dashboard
+    deactivate Dash
+
+else User Tidak Ditemukan
+    System --> UI : 12. Return {success: false, message: "User not found"}
+    deactivate System
+    activate UI
+    UI --> User : 13. Tampilkan "Email tidak terdaftar"
+    deactivate UI
+
+else Password Salah
+    System --> UI : 14. Return {success: false, message: "Invalid password"}
+    deactivate System
+    activate UI
+    UI --> User : 15. Tampilkan "Password salah"
+    deactivate UI
+
+else Akun Non-Aktif
+    System --> UI : 16. Return {success: false, message: "Account disabled"}
+    deactivate System
+    activate UI
+    UI --> User : 17. Tampilkan "Akun dinonaktifkan"
+    deactivate UI
+end
+
+note right of User
+  * Semua komunikasi via HTTPS
+  * Password dikirim terenkripsi
+  * Token disimpan di localStorage/HttpOnly cookie
+end note
+
+@enduml

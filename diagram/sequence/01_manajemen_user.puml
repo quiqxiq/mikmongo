@@ -1,0 +1,69 @@
+@startuml
+!theme plain
+skinparam sequenceArrowThickness 1.5
+skinparam roundCorner 6
+skinparam ParticipantPadding 15
+skinparam defaultFontSize 12
+
+actor "Admin" as Admin
+participant "Frontend" as FE
+boundary "Server API" as API
+control "Layanan\nPengguna" as Svc
+database "Database" as DB
+
+
+== Lihat Daftar Pengguna ==
+Admin -> FE : Buka menu Pengguna
+FE -> API : GET /users
+activate API
+API -> Svc : DaftarPengguna()
+activate Svc
+Svc -> DB : Ambil data pengguna
+DB --> Svc : Daftar pengguna
+Svc --> API : Data pengguna
+deactivate Svc
+API --> FE : 200 OK
+deactivate API
+FE --> Admin : Tampilkan tabel
+
+== Tambah Pengguna ==
+Admin -> FE : Isi formulir pengguna baru
+FE -> API : POST /users
+activate API
+API -> Svc : BuatPengguna(data)
+activate Svc
+Svc -> DB : Cek email & simpan pengguna
+DB --> Svc : Pengguna tersimpan
+Svc --> API : Data pengguna baru
+deactivate Svc
+API --> FE : 201 Created
+deactivate API
+FE --> Admin : Pengguna berhasil ditambahkan
+
+== Ubah Pengguna ==
+Admin -> FE : Edit data pengguna
+FE -> API : PUT /users/:id
+activate API
+API -> Svc : UbahPengguna(id, data)
+activate Svc
+Svc -> DB : Simpan perubahan
+Svc --> API : Data terbaru
+deactivate Svc
+API --> FE : 200 OK
+deactivate API
+FE --> Admin : Perubahan tersimpan
+
+== Hapus Pengguna ==
+Admin -> FE : Hapus pengguna
+FE -> API : DELETE /users/:id
+activate API
+API -> Svc : HapusPengguna(id)
+activate Svc
+Svc -> DB : Soft delete
+Svc --> API : Berhasil
+deactivate Svc
+API --> FE : 200 OK
+deactivate API
+FE --> Admin : Pengguna dihapus
+
+@enduml

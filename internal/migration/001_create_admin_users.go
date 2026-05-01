@@ -21,8 +21,8 @@ func up001(ctx context.Context, tx *sql.Tx) error {
 		phone         VARCHAR(20),
 		password_hash VARCHAR(255) NOT NULL,
 		role          VARCHAR(20)  NOT NULL
-		              CHECK (role IN ('superadmin', 'admin', 'cs', 'billing', 'technician', 'readonly'))
-		              DEFAULT 'cs',
+		              CHECK (role IN ('superadmin', 'admin', 'technician', 'sales_agent', 'customer'))
+		              DEFAULT 'customer',
 		is_active     BOOLEAN    DEFAULT true,
 		last_login    TIMESTAMPTZ,
 		last_ip       VARCHAR(45),
@@ -40,7 +40,7 @@ func up001(ctx context.Context, tx *sql.Tx) error {
 	COMMENT ON TABLE  users              IS 'Admin dan operator sistem ISP';
 	COMMENT ON COLUMN users.password_hash IS 'bcrypt hash password';
 	COMMENT ON COLUMN users.bearer_key    IS 'API key untuk akses programatik / integrasi eksternal';
-	COMMENT ON COLUMN users.role          IS 'superadmin=full access, admin=manajemen, cs=customer service, billing=keuangan, technician=lapangan, readonly=lihat saja';
+	COMMENT ON COLUMN users.role          IS 'superadmin=full access, admin=manajemen, technician=lapangan, sales_agent=agen penjualan, customer=pelanggan';
 	`)
 	return err
 }

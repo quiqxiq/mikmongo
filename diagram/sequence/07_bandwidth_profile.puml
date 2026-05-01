@@ -1,0 +1,132 @@
+@startuml
+!theme mars
+autonumber
+skinparam sequenceMessageAlign center
+
+' Definisi Partisipan
+actor "Admin/Teknisi" as User
+boundary "Bandwidth Page" as UI
+control "Sistem (Backend)" as System
+database "Database(profiles)" as DB
+participant "MikroTik Router" as MT
+
+' ================= FLOW 1: CREATE (TAMBAH PROFIL) =================
+group Create Bandwidth Profile & Sync to Router
+    User -> UI : Input (Nama, Speed Up/Down, Harga)
+    activate UI
+    UI -> System : POST /api/profiles {data}
+    deactivate UI
+    activate System
+    
+    System -> DB : INSERT bandwidth_profiles
+    activate DB
+    DB --> System : Return profile_id
+    deactivate DB
+    
+    System -> MT : API: /ppp/profile/add {name, local-remote-limit}
+    activate MT
+    
+    alt Router Reachable (Online)
+        MT --> System : Return OK
+        deactivate MT
+        
+        System -> DB : UPDATE status = 'synced'
+        activate DB
+        DB --> System : Success
+        deactivate DB
+        
+        System --> UI : Return {success: true, message: "Tersimpan & Tersinkronisasi"}
+        deactivate System
+        activate UI
+        UI --> User : "Profil berhasil ditambahkan ke Router"
+        deactivate UI
+        
+    else Router Unreachable (Offline)
+        MT --> System : Error: Timeout/Unreachable
+        deactivate MT
+        
+        System -> DB : UPDATE status = 'pending_sync'
+        activate DB
+        DB --> System : Success
+        deactivate DB
+        
+        System --> UI : Warning: "Tersimpan di DB, gagal sync ke Router"
+        deactivate System
+        activate UI
+        UI --> User : "Data tersimpan, status pending"
+        deactivate UI
+    end
+end
+
+' ================= FLOW 2: UPDATE (EDIT PROFIL) =================
+group Update Profile Speed & Sync
+    User -> UI : Edit Speed Limit & Klik Simpan
+    activate UI
+    UI -> System : PUT /api/profiles/{id} {new_limits}
+    deactivate UI
+    activate System
+    
+    System -> DB : UPDATE bandwidth_profiles
+    activate DB
+    DB --> System : Update berhasil
+    deactivate DB
+    
+    System -> MT : API: /ppp/profile/set {profile_id, new-limits}
+    activate MT
+    MT --> System : Return OK
+    deactivate MT
+    
+    System --> UI : Return {success: true}
+    deactivate System
+    activate UI
+    UI --> User : "Profil di Router & DB telah diupdate"
+    deactivate UI
+end
+
+' ================= FLOW 3: DELETE (HAPUS PROFIL) =================
+group Delete Profile
+    User -> UI : Klik "Hapus" pada profil
+    activate UI
+    UI -> System : DELETE /api/profiles/{id}
+    deactivate UI
+    activate System
+    
+    ' PENTING: Cek apakah profil sedang dipakai customer
+    System -> DB : Check usage in 'customers' or 'subscriptions' table
+    activate DB
+    DB --> System : Return usage_count
+    deactivate DB
+    
+    alt Masih Digunakan (usage_count > 0)
+        System --> UI : Error: "Profil sedang digunakan customer"
+        deactivate System
+        activate UI
+        UI --> User : "Gagal: Pindahkan customer ke profil lain dulu"
+        deactivate UI
+    else Aman untuk Dihapus (usage_count == 0)
+        System -> MT : API: /ppp/profile/remove {profile_id}
+        activate MT
+        MT --> System : Return OK
+        deactivate MT
+        
+        System -> DB : DELETE FROM bandwidth_profiles WHERE id = ?
+        activate DB
+        DB --> System : Delete berhasil
+        deactivate DB
+        
+        System --> UI : Return {success: true}
+        deactivate System
+        activate UI
+        UI --> User : "Profil berhasil dihapus permanen"
+        deactivate UI
+    end
+end
+
+note right of User
+  * Database: Menyimpan master data profil
+  * MikroTik (PPP Profile): Template kecepatan yang diterapkan ke user
+  * Jika DB berubah, MikroTik harus ikut berubah (Sinkronisasi)
+  * Delete hanya diizinkan jika tidak ada customer aktif
+end note
+
+@enduml

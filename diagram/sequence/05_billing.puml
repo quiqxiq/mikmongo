@@ -1,0 +1,125 @@
+@startuml
+!theme mars
+autonumber
+skinparam sequenceMessageAlign center
+
+' Definisi Partisipan
+actor "Admin / Customer" as User
+boundary "Billing Page" as UI
+control "Sistem (Backend)" as System
+database "Database(invoices)" as DB
+participant "MikroTik Router" as MT
+
+' ================= FLOW 1: GENERATE TAGIHAN (CRON) =================
+group Generate Tagihan Bulanan (Cron Job)
+    System -> System : Trigger Harian (Cron Scheduler)
+    
+    System -> DB : Cek langganan jatuh tempo hari ini
+    activate DB
+    DB --> System : Return list subscription
+    deactivate DB
+    
+    loop Untuk setiap langganan
+        System -> System : Hitung nominal & buat Invoice
+        System -> DB : INSERT invoices (status='pending')
+        activate DB
+        DB --> System : ID Invoice tersimpan
+        deactivate DB
+        System -> System : Kirim Notif Tagihan (WA/Email)
+    end
+    
+    System -> System : Selesai Generate
+end
+
+' ================= FLOW 2: PEMBAYARAN & VERIFIKASI =================
+group Pembayaran Layanan
+    User -> UI : Upload Bukti Pembayaran
+    activate UI
+    UI -> System : POST /api/payments {invoice_id, proof}
+    deactivate UI
+    activate System
+    
+    System -> System : Validasi Bukti Bayar
+    alt Bukti Valid
+        System -> DB : UPDATE invoices SET status='paid'
+        activate DB
+        DB --> System : Update berhasil
+        deactivate DB
+        
+        System -> UI : Return {success: true}
+        deactivate System
+        activate UI
+        UI --> User : Tampilkan "Pembayaran Diterima"
+        deactivate UI
+    else Bukti Tidak Valid
+        System --> UI : Return {error: "Bukti tidak sesuai"}
+        deactivate System
+        activate UI
+        UI --> User : Tampilkan "Gagal Verifikasi"
+        deactivate UI
+    end
+end
+
+' ================= FLOW 3: ISOLASI (JATUH TEMPO) =================
+group Isolasi Customer (Jatuh Tempo)
+    System -> System : Trigger Harian (Cron Isolasi)
+    
+    System -> DB : Cek Invoice Unpaid yang melewati due_date
+    activate DB
+    DB --> System : Return list overdue
+    deactivate DB
+    
+    loop Untuk setiap customer overdue
+        System -> MT : API: /ppp/secret/set {disabled=yes}
+        activate MT
+        MT --> System : Return OK (Secret Disabled)
+        deactivate MT
+        
+        System -> DB : UPDATE customers SET status='isolated'
+        activate DB
+        DB --> System : Update berhasil
+        deactivate DB
+        
+        System -> System : Catat Log Isolasi
+    end
+    
+    System -> System : Selesai Isolasi
+end
+
+' ================= FLOW 4: UN-ISOLASI (PEMBAYARAN LUNAS) =================
+group Un-Isolasi (Auto Active)
+    User -> UI : Klik "Lunasi" (Setelah verifikasi manual)
+    activate UI
+    UI -> System : POST /api/unisolate {customer_id}
+    deactivate UI
+    activate System
+    
+    System -> DB : Cek status invoice
+    activate DB
+    DB --> System : Confirm status='paid'
+    deactivate DB
+    
+    System -> MT : API: /ppp/secret/set {disabled=no}
+    activate MT
+    MT --> System : Return OK (Secret Enabled)
+    deactivate MT
+    
+    System -> DB : UPDATE customers SET status='active'
+    activate DB
+    DB --> System : Update berhasil
+    deactivate DB
+    
+    System --> UI : Return {success: true, message: "Customer Aktif Kembali"}
+    deactivate System
+    activate UI
+    UI --> User : Tampilkan "Layanan Dipulihkan"
+    deactivate UI
+end
+
+note right of User
+  * Cron Job: Proses otomatis di background
+  * Isolasi: Mematikan akses PPPoE di MikroTik
+  * Database: Mencatat riwayat keuangan (Invoices)
+end note
+
+@enduml

@@ -1,0 +1,147 @@
+<mxGraphModel adaptiveColors="auto">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="title" value="Login Sequence Diagram &#8212; MikMongo" style="text;html=1;fontSize=16;fontStyle=1;align=center;verticalAlign=middle;whiteSpace=wrap;" vertex="1" parent="1">
+      <mxGeometry x="140" y="20" width="520" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="actor_client" value="Client" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;participant=umlActor;size=40;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+      <mxGeometry x="80" y="70" width="20" height="520" as="geometry"/>
+    </mxCell>
+    <mxCell id="ll_router" value=":Gin Router" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;size=40;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+      <mxGeometry x="210" y="70" width="100" height="520" as="geometry"/>
+    </mxCell>
+    <mxCell id="ll_handler" value=":AuthHandler" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;size=40;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+      <mxGeometry x="370" y="70" width="100" height="520" as="geometry"/>
+    </mxCell>
+    <mxCell id="ll_service" value=":AuthService" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;size=40;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+      <mxGeometry x="530" y="70" width="100" height="520" as="geometry"/>
+    </mxCell>
+    <mxCell id="ll_db" value=":UserRepo&#10;(PostgreSQL)" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;size=40;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+      <mxGeometry x="690" y="70" width="100" height="520" as="geometry"/>
+    </mxCell>
+    <mxCell id="msg1" style="html=1;verticalAlign=bottom;endArrow=block;entryX=0;entryY=0;exitX=1;exitY=0;exitDx=0;exitDy=0;entryDx=0;entryDy=0;strokeColor=#6c8ebf;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="90" y="140" as="sourcePoint"/>
+        <mxPoint x="260" y="140" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="msg1_label" value="POST /api/v1/auth/login&#10;{email, password}" style="edgeLabel;html=1;align=center;verticalAlign=bottom;resizable=0;points=[];fontSize=10;" vertex="1" connectable="0" parent="msg1">
+      <mxGeometry x="-0.1" relative="1" as="geometry">
+        <mxPoint as="offset"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="msg2" style="html=1;verticalAlign=bottom;endArrow=block;strokeColor=#82b366;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="260" y="170" as="sourcePoint"/>
+        <mxPoint x="420" y="170" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="msg2_label" value="Login(c)" style="edgeLabel;html=1;align=center;verticalAlign=bottom;resizable=0;points=[];fontSize=10;" vertex="1" connectable="0" parent="msg2">
+      <mxGeometry x="-0.1" relative="1" as="geometry">
+        <mxPoint as="offset"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="msg3" style="html=1;verticalAlign=bottom;endArrow=block;strokeColor=#d6b656;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="420" y="200" as="sourcePoint"/>
+        <mxPoint x="580" y="200" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="msg3_label" value="Login(ctx, email, password)" style="edgeLabel;html=1;align=center;verticalAlign=bottom;resizable=0;points=[];fontSize=10;" vertex="1" connectable="0" parent="msg3">
+      <mxGeometry x="-0.1" relative="1" as="geometry">
+        <mxPoint as="offset"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="msg4" style="html=1;verticalAlign=bottom;endArrow=block;strokeColor=#9673a6;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="580" y="235" as="sourcePoint"/>
+        <mxPoint x="740" y="235" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="msg4_label" value="GetByEmail(ctx, email)" style="edgeLabel;html=1;align=center;verticalAlign=bottom;resizable=0;points=[];fontSize=10;" vertex="1" connectable="0" parent="msg4">
+      <mxGeometry x="-0.1" relative="1" as="geometry">
+        <mxPoint as="offset"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="msg5" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;strokeColor=#b85450;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="740" y="270" as="sourcePoint"/>
+        <mxPoint x="580" y="270" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="msg5_label" value="*model.User" style="edgeLabel;html=1;align=center;verticalAlign=bottom;resizable=0;points=[];fontSize=10;" vertex="1" connectable="0" parent="msg5">
+      <mxGeometry x="-0.1" relative="1" as="geometry">
+        <mxPoint as="offset"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="note_bcrypt" value="bcrypt.CompareHashAndPassword&#10;(user.PasswordHash, password)" style="shape=note;size=15;whiteSpace=wrap;html=1;fillColor=#FFF9C4;strokeColor=#d6b656;align=left;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="600" y="290" width="200" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="msg_self" style="html=1;verticalAlign=bottom;endArrow=block;curved=1;strokeColor=#9673a6;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="580" y="300" as="sourcePoint"/>
+        <mxPoint x="580" y="335" as="targetPoint"/>
+        <Array as="points">
+          <mxPoint x="595" y="318"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="msg6" style="html=1;verticalAlign=bottom;endArrow=block;strokeColor=#9673a6;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="580" y="350" as="sourcePoint"/>
+        <mxPoint x="740" y="350" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="msg6_label" value="UpdateLastLogin(ctx, id)" style="edgeLabel;html=1;align=center;verticalAlign=bottom;resizable=0;points=[];fontSize=10;" vertex="1" connectable="0" parent="msg6">
+      <mxGeometry x="-0.1" relative="1" as="geometry">
+        <mxPoint as="offset"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="note_jwt" value="jwtService.GenerateTokenPair&#10;(userID, email, role)" style="shape=note;size=15;whiteSpace=wrap;html=1;fillColor=#FFF9C4;strokeColor=#d6b656;align=left;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="600" y="375" width="190" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="msg_self2" style="html=1;verticalAlign=bottom;endArrow=block;curved=1;strokeColor=#9673a6;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="580" y="385" as="sourcePoint"/>
+        <mxPoint x="580" y="420" as="targetPoint"/>
+        <Array as="points">
+          <mxPoint x="595" y="403"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="msg7" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;strokeColor=#9673a6;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="580" y="440" as="sourcePoint"/>
+        <mxPoint x="420" y="440" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="msg7_label" value="*LoginResponse&#10;{access_token, refresh_token, user}" style="edgeLabel;html=1;align=center;verticalAlign=bottom;resizable=0;points=[];fontSize=10;" vertex="1" connectable="0" parent="msg7">
+      <mxGeometry x="-0.1" relative="1" as="geometry">
+        <mxPoint as="offset"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="msg8" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;strokeColor=#d6b656;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="420" y="475" as="sourcePoint"/>
+        <mxPoint x="260" y="475" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="msg8_label" value="c.JSON(200, SuccessResponse)" style="edgeLabel;html=1;align=center;verticalAlign=bottom;resizable=0;points=[];fontSize=10;" vertex="1" connectable="0" parent="msg8">
+      <mxGeometry x="-0.1" relative="1" as="geometry">
+        <mxPoint as="offset"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="msg9" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;strokeColor=#82b366;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="260" y="510" as="sourcePoint"/>
+        <mxPoint x="90" y="510" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="msg9_label" value="200 OK&#10;{success:true, data:{access_token, refresh_token, user}}" style="edgeLabel;html=1;align=center;verticalAlign=bottom;resizable=0;points=[];fontSize=10;" vertex="1" connectable="0" parent="msg9">
+      <mxGeometry x="-0.1" relative="1" as="geometry">
+        <mxPoint as="offset"/>
+      </mxGeometry>
+    </mxCell>
+  </root>
+</mxGraphModel>

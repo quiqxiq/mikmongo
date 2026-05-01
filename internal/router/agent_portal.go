@@ -43,9 +43,6 @@ func registerAgentAdminRoutes(v1 *gin.RouterGroup, handlers *handler.Registry) {
 		agents.POST("/:id/invoices/generate", handlers.AgentInvoice.Generate)
 	}
 
-	// Hotspot sales (global)
-	v1.GET("/hotspot-sales", handlers.HotspotSale.List)
-
 	// Agent invoices (global)
 	agentInvoices := v1.Group("/agent-invoices")
 	{

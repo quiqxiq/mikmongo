@@ -127,27 +127,25 @@ func registerAdminRoutes(v1 *gin.RouterGroup, handlers *handler.Registry) {
 	}
 
 	// Cash entries
-	if handlers.CashManagement != nil {
-		cashEntries := v1.Group("/cash-entries")
-		{
-			cashEntries.GET("", handlers.CashManagement.ListEntries)
-			cashEntries.POST("", handlers.CashManagement.CreateEntry)
-			cashEntries.GET("/:id", handlers.CashManagement.GetEntry)
-			cashEntries.PUT("/:id", handlers.CashManagement.UpdateEntry)
-			cashEntries.DELETE("/:id", handlers.CashManagement.DeleteEntry)
-			cashEntries.POST("/:id/approve", handlers.CashManagement.ApproveEntry)
-			cashEntries.POST("/:id/reject", handlers.CashManagement.RejectEntry)
-		}
+	cashEntries := v1.Group("/cash-entries")
+	{
+		cashEntries.GET("", handlers.CashManagement.ListEntries)
+		cashEntries.POST("", handlers.CashManagement.CreateEntry)
+		cashEntries.GET("/:id", handlers.CashManagement.GetEntry)
+		cashEntries.PUT("/:id", handlers.CashManagement.UpdateEntry)
+		cashEntries.DELETE("/:id", handlers.CashManagement.DeleteEntry)
+		cashEntries.POST("/:id/approve", handlers.CashManagement.ApproveEntry)
+		cashEntries.POST("/:id/reject", handlers.CashManagement.RejectEntry)
+	}
 
-		// Petty cash
-		pettyCash := v1.Group("/petty-cash")
-		{
-			pettyCash.GET("", handlers.CashManagement.ListFunds)
-			pettyCash.POST("", handlers.CashManagement.CreateFund)
-			pettyCash.GET("/:id", handlers.CashManagement.GetFund)
-			pettyCash.PUT("/:id", handlers.CashManagement.UpdateFund)
-			pettyCash.POST("/:id/topup", handlers.CashManagement.TopUpFund)
-		}
+	// Petty cash
+	pettyCash := v1.Group("/petty-cash")
+	{
+		pettyCash.GET("", handlers.CashManagement.ListFunds)
+		pettyCash.POST("", handlers.CashManagement.CreateFund)
+		pettyCash.GET("/:id", handlers.CashManagement.GetFund)
+		pettyCash.PUT("/:id", handlers.CashManagement.UpdateFund)
+		pettyCash.POST("/:id/topup", handlers.CashManagement.TopUpFund)
 	}
 
 	// Reports
@@ -155,11 +153,9 @@ func registerAdminRoutes(v1 *gin.RouterGroup, handlers *handler.Registry) {
 	{
 		reports.GET("/summary", handlers.Report.GetSummary)
 		reports.GET("/subscriptions", handlers.Report.GetSubscriptions)
-		if handlers.CashManagement != nil {
-			reports.GET("/cash-flow", handlers.CashManagement.GetCashFlow)
-			reports.GET("/cash-balance", handlers.CashManagement.GetCashBalance)
-			reports.GET("/reconciliation", handlers.CashManagement.GetReconciliation)
-		}
+		reports.GET("/cash-flow", handlers.CashManagement.GetCashFlow)
+		reports.GET("/cash-balance", handlers.CashManagement.GetCashBalance)
+		reports.GET("/reconciliation", handlers.CashManagement.GetReconciliation)
 	}
 
 	// System settings

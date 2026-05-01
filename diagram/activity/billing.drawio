@@ -1,0 +1,157 @@
+<mxfile host="65bd71144e">
+    <diagram id="Hj0me3lJ64A88o9aagnB" name="Page-1">
+        <mxGraphModel dx="3225" dy="2569" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+
+                <!-- GENERATE INVOICE -->
+                <mxCell id="lbl_gen" value="Generate Invoice" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+                    <mxGeometry x="30" y="-302" width="120" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="gu" value="Sistem (Cron)" style="swimlane;whiteSpace=wrap;html=1;startSize=40;fillColor=#f5f5f5;fontColor=#333333;strokeColor=#666666;" vertex="1" parent="1">
+                    <mxGeometry x="30" y="-260" width="300" height="560" as="geometry"/>
+                </mxCell>
+                <mxCell id="gu_start" value="" style="ellipse;aspect=fixed;fillColor=#000000;strokeColor=#000000;" vertex="1" parent="gu">
+                    <mxGeometry x="136" y="60" width="28" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="gu_cron" value="Cron: Ambil Langganan&#xa;Jatuh Tempo Hari Ini" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;arcSize=30;" vertex="1" parent="gu">
+                    <mxGeometry x="80" y="120" width="140" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="gu_notif" value="Terima Notifikasi Tagihan Baru" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;arcSize=30;" vertex="1" parent="gu">
+                    <mxGeometry x="80" y="440" width="140" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="gu_end" value="" style="shape=doubleEllipse;aspect=fixed;fillColor=#000000;strokeColor=#000000;" vertex="1" parent="gu">
+                    <mxGeometry x="136" y="515" width="28" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_gu1" style="edgeStyle=none;html=1;" edge="1" parent="gu" source="gu_start" target="gu_cron"><mxGeometry relative="1" as="geometry"/></mxCell>
+                <mxCell id="e_gu_end" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="gu" source="gu_notif" target="gu_end"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+                <mxCell id="gs" value="Sistem (Billing)" style="swimlane;whiteSpace=wrap;html=1;startSize=40;fillColor=#f5f5f5;fontColor=#333333;strokeColor=#666666;" vertex="1" parent="1">
+                    <mxGeometry x="330" y="-260" width="300" height="560" as="geometry"/>
+                </mxCell>
+                <mxCell id="gs_dates" value="Cek Tanggal Aktif&#xa;&amp; Siklus Billing" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;arcSize=30;" vertex="1" parent="gs">
+                    <mxGeometry x="65" y="120" width="170" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="gs_calc" value="Hitung Nominal&#xa;Berdasarkan Paket" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;arcSize=30;" vertex="1" parent="gs">
+                    <mxGeometry x="65" y="230" width="170" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="gs_save" value="Simpan Record Invoice&#xa;ke Database" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;arcSize=30;" vertex="1" parent="gs">
+                    <mxGeometry x="65" y="330" width="170" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="gs_pdf" value="Generate PDF &amp;&#xa;Kirim Notifikasi" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;arcSize=30;" vertex="1" parent="gs">
+                    <mxGeometry x="65" y="430" width="170" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_gs1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="gs" source="gs_dates" target="gs_calc"><mxGeometry relative="1" as="geometry"/></mxCell>
+                <mxCell id="e_gs2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="gs" source="gs_calc" target="gs_save"><mxGeometry relative="1" as="geometry"/></mxCell>
+                <mxCell id="e_gs3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="gs" source="gs_save" target="gs_pdf"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+                <mxCell id="e_cross_g1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="gu_cron" target="gs_dates"><mxGeometry relative="1" as="geometry"/></mxCell>
+                <mxCell id="e_cross_g2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="gs_pdf" target="gu_notif"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+                <!-- PEMBAYARAN -->
+                <mxCell id="lbl_pay" value="Pembayaran" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+                    <mxGeometry x="670" y="-302" width="100" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="pu" value="Admin / Customer" style="swimlane;whiteSpace=wrap;html=1;startSize=40;fillColor=#f5f5f5;fontColor=#333333;strokeColor=#666666;" vertex="1" parent="1">
+                    <mxGeometry x="660" y="-260" width="300" height="620" as="geometry"/>
+                </mxCell>
+                <mxCell id="pu_start" value="" style="ellipse;aspect=fixed;fillColor=#000000;strokeColor=#000000;" vertex="1" parent="pu">
+                    <mxGeometry x="136" y="60" width="28" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="pu_input" value="Input Bukti Bayar /&#xa;Gateway Callback" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;arcSize=30;" vertex="1" parent="pu">
+                    <mxGeometry x="80" y="120" width="140" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="pu_err" value="Tolak: Bukti Tidak Sesuai" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;arcSize=30;" vertex="1" parent="pu">
+                    <mxGeometry x="80" y="330" width="140" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="pu_lunas" value="Terima Notifikasi Lunas" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;arcSize=30;" vertex="1" parent="pu">
+                    <mxGeometry x="80" y="520" width="140" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="pu_end" value="" style="shape=doubleEllipse;aspect=fixed;fillColor=#000000;strokeColor=#000000;" vertex="1" parent="pu">
+                    <mxGeometry x="136" y="580" width="28" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_pu1" style="edgeStyle=none;html=1;" edge="1" parent="pu" source="pu_start" target="pu_input"><mxGeometry relative="1" as="geometry"/></mxCell>
+                <mxCell id="e_pu_end" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="pu" source="pu_lunas" target="pu_end"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+                <mxCell id="ps" value="Sistem (Billing)" style="swimlane;whiteSpace=wrap;html=1;startSize=40;fillColor=#f5f5f5;fontColor=#333333;strokeColor=#666666;" vertex="1" parent="1">
+                    <mxGeometry x="960" y="-260" width="300" height="620" as="geometry"/>
+                </mxCell>
+                <mxCell id="ps_val" value="Validasi Nominal &amp;&#xa;Keaslian Bukti" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;arcSize=30;" vertex="1" parent="ps">
+                    <mxGeometry x="65" y="120" width="170" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="ps_q_pay" value="Pembayaran Valid?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="ps">
+                    <mxGeometry x="90" y="220" width="120" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="ps_lunas" value="Update Status Invoice&#xa;= LUNAS" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;arcSize=30;" vertex="1" parent="ps">
+                    <mxGeometry x="65" y="400" width="170" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="ps_notif" value="Kirim Notifikasi&#xa;Pembayaran Sukses" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;arcSize=30;" vertex="1" parent="ps">
+                    <mxGeometry x="65" y="490" width="170" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_ps1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="ps" source="ps_val" target="ps_q_pay"><mxGeometry relative="1" as="geometry"/></mxCell>
+                <mxCell id="e_ps2" value="Ya" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#82b366;fontColor=#82b366;fontStyle=1;" edge="1" parent="ps" source="ps_q_pay" target="ps_lunas"><mxGeometry relative="1" as="geometry"/></mxCell>
+                <mxCell id="e_ps3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="ps" source="ps_lunas" target="ps_notif"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+                <mxCell id="e_cross_p1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="pu_input" target="ps_val"><mxGeometry relative="1" as="geometry"/></mxCell>
+                <mxCell id="e_cross_p2" value="Tidak" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#b85450;fontColor=#b85450;fontStyle=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="ps_q_pay" target="pu_err"><mxGeometry relative="1" as="geometry"/></mxCell>
+                <mxCell id="e_cross_p3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="ps_notif" target="pu_lunas"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+                <!-- ISOLASI OTOMATIS -->
+                <mxCell id="lbl_iso" value="Isolasi Otomatis" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+                    <mxGeometry x="30" y="420" width="120" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="iu" value="Sistem (Cron)" style="swimlane;whiteSpace=wrap;html=1;startSize=40;fillColor=#f5f5f5;fontColor=#333333;strokeColor=#666666;" vertex="1" parent="1">
+                    <mxGeometry x="30" y="460" width="300" height="620" as="geometry"/>
+                </mxCell>
+                <mxCell id="iu_start" value="" style="ellipse;aspect=fixed;fillColor=#000000;strokeColor=#000000;" vertex="1" parent="iu">
+                    <mxGeometry x="136" y="60" width="28" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="iu_cron" value="Cron: Cek Invoice&#xa;Belum Bayar" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;arcSize=30;" vertex="1" parent="iu">
+                    <mxGeometry x="80" y="120" width="140" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="iu_warn" value="Warning: Gagal Isolasi Router" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;arcSize=30;" vertex="1" parent="iu">
+                    <mxGeometry x="80" y="470" width="140" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="iu_end" value="" style="shape=doubleEllipse;aspect=fixed;fillColor=#000000;strokeColor=#000000;" vertex="1" parent="iu">
+                    <mxGeometry x="136" y="570" width="28" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_iu1" style="edgeStyle=none;html=1;" edge="1" parent="iu" source="iu_start" target="iu_cron"><mxGeometry relative="1" as="geometry"/></mxCell>
+                <mxCell id="e_iu_end" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="iu" source="iu_warn" target="iu_end"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+                <mxCell id="is_" value="Sistem (Billing)" style="swimlane;whiteSpace=wrap;html=1;startSize=40;fillColor=#f5f5f5;fontColor=#333333;strokeColor=#666666;" vertex="1" parent="1">
+                    <mxGeometry x="330" y="460" width="300" height="620" as="geometry"/>
+                </mxCell>
+                <mxCell id="is_filter" value="Filter Invoice Melewati&#xa;Due Date" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;arcSize=30;" vertex="1" parent="is_">
+                    <mxGeometry x="65" y="120" width="170" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="is_q_exp" value="Ada yang Jatuh Tempo?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="is_">
+                    <mxGeometry x="90" y="220" width="120" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="is_mark" value="Tandai Status = OVERDUE" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;arcSize=30;" vertex="1" parent="is_">
+                    <mxGeometry x="65" y="330" width="170" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="is_cmd" value="Kirim Perintah Isolasi&#xa;ke MikroTik" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;arcSize=30;" vertex="1" parent="is_">
+                    <mxGeometry x="65" y="420" width="170" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="is_q_ok" value="Isolasi Berhasil?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="is_">
+                    <mxGeometry x="90" y="510" width="120" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="is_log" value="Catat Log Isolasi &amp; Waktu" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;arcSize=30;" vertex="1" parent="is_">
+                    <mxGeometry x="65" y="570" width="170" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="is_end" value="" style="shape=doubleEllipse;aspect=fixed;fillColor=#000000;strokeColor=#000000;" vertex="1" parent="is_">
+                    <mxGeometry x="136" y="570" width="28" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_is1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="is_" source="is_filter" target="is_q_exp"><mxGeometry relative="1" as="geometry"/></mxCell>
+                <mxCell id="e_is2" value="Ya" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#82b366;fontColor=#82b366;fontStyle=1;" edge="1" parent="is_" source="is_q_exp" target="is_mark"><mxGeometry relative="1" as="geometry"/></mxCell>
+                <mxCell id="e_is3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="is_" source="is_mark" target="is_cmd"><mxGeometry relative="1" as="geometry"/></mxCell>
+                <mxCell id="e_is4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="is_" source="is_cmd" target="is_q_ok"><mxGeometry relative="1" as="geometry"/></mxCell>
+                <mxCell id="e_is5" value="Ya" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#82b366;fontColor=#82b366;fontStyle=1;" edge="1" parent="is_" source="is_q_ok" target="is_log"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+                <mxCell id="e_cross_i1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="iu_cron" target="is_filter"><mxGeometry relative="1" as="geometry"/></mxCell>
+                <mxCell id="e_cross_i2" value="Tidak" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#b85450;fontColor=#b85450;fontStyle=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="is_q_ok" target="iu_warn"><mxGeometry relative="1" as="geometry"/></mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

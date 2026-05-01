@@ -1,0 +1,131 @@
+@startuml
+!theme mars
+autonumber
+skinparam sequenceMessageAlign center
+
+' Definisi Partisipan
+actor "Admin/Teknisi" as User
+boundary "Customer Page" as UI
+control "Sistem (Backend)" as System
+database "Database(customers)" as DB
+participant "MikroTik Router" as MT
+
+' ================= FLOW 1: REGISTER CUSTOMER =================
+group Registrasi Customer Baru
+    User -> UI : 1. Input data customer (nama, email, no HP)
+    activate UI
+    UI -> UI : 2. Validasi format input
+    UI -> System : 3. POST /api/customers {data}
+    deactivate UI
+    activate System
+    
+    System -> DB : 4. Cek email/username unik
+    activate DB
+    DB --> System : 5. Return hasil cek
+    deactivate DB
+    
+    alt Data sudah ada
+        System --> UI : 6. Return error: "Data sudah terdaftar"
+        deactivate System
+        activate UI
+        UI --> User : 7. Tampilkan pesan error
+        deactivate UI
+    else Data unik
+        System -> DB : 8. INSERT customers (status=pending)
+        activate DB
+        DB --> System : 9. Return customer_id
+        deactivate DB
+        System --> UI : 10. Return {success: true, customer_id}
+        deactivate System
+        activate UI
+        UI --> User : 11. Tampilkan "Customer terdaftar (Pending)"
+        deactivate UI
+    end
+end
+
+' ================= FLOW 2: AKTIVASI & PROVISIONING PPP SECRET =================
+group Aktivasi Layanan (Provisioning)
+    User -> UI : 12. Pilih customer & klik "Aktifkan"
+    activate UI
+    UI -> System : 13. POST /api/customers/{id}/activate {profile_id}
+    deactivate UI
+    activate System
+    
+    System -> DB : 14. GET customer + bandwidth_profile
+    activate DB
+    DB --> System : 15. Return data profil (speed, router_id)
+    deactivate DB
+    
+    System -> System : 16. Generate username/password PPPoE
+    System -> MT : 17. API: /ppp/secret/add {name, password, profile}
+    activate MT
+    
+    alt Koneksi Router Gagal
+        MT --> System : 18. Return error: timeout/unreachable
+        deactivate MT
+        System --> UI : 19. Return warning: "DB saved, router unreachable"
+        deactivate System
+        activate UI
+        UI --> User : 20. Tampilkan "Perlu sinkronisasi manual"
+        deactivate UI
+    else Router OK
+        MT -> MT : 19. Create PPP Secret + Assign Profile
+        MT --> System : 20. Return success
+        deactivate MT
+        
+        System -> DB : 21. UPDATE customers (status=active, ppp_secret_id)
+        activate DB
+        DB --> System : 22. Update berhasil
+        deactivate DB
+        
+        System --> UI : 23. Return {success: true, credentials}
+        deactivate System
+        activate UI
+        UI --> User : 24. Tampilkan "Aktif! Username/Password dikirim ke customer"
+        deactivate UI
+    end
+end
+
+' ================= FLOW 3: CEK STATUS ONLINE (PPP ACTIVE) =================
+group Monitoring Status Customer
+    User -> UI : 25. Klik "Cek Koneksi" pada customer
+    activate UI
+    UI -> System : 26. GET /api/customers/{id}/status
+    deactivate UI
+    activate System
+    
+    System -> MT : 27. API: /ppp/active/print (filter by username)
+    activate MT
+    MT --> System : 28. Return session data (IP, uptime, bytes)
+    deactivate MT
+    
+    alt Session ditemukan (Online)
+        System -> DB : 29. UPDATE customers (last_seen, status=online)
+        activate DB
+        DB --> System : 30. Update berhasil
+        deactivate DB
+        System --> UI : 31. Return {status: "online", ip, uptime}
+        deactivate System
+        activate UI
+        UI --> User : 32. Tampilkan badge 🟢 Online + detail sesi
+        deactivate UI
+    else Session tidak ditemukan (Offline)
+        System -> DB : 33. UPDATE customers (status=offline)
+        activate DB
+        DB --> System : 34. Update berhasil
+        deactivate DB
+        System --> UI : 35. Return {status: "offline"}
+        deactivate System
+        activate UI
+        UI --> User : 36. Tampilkan badge 🔴 Offline
+        deactivate UI
+    end
+end
+
+note right of User
+  * PPP Secret: kredensial login customer di MikroTik
+  * PPP Active: sesi real-time customer yang sedang online
+  * Bandwidth Profile: template speed limit yang di-assign ke PPP Secret
+end note
+
+@enduml

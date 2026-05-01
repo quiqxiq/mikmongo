@@ -37,9 +37,8 @@ func NewEnforcer(db *gorm.DB) (*casbincore.Enforcer, error) {
 func seedDefaultPolicies(e *casbincore.Enforcer) {
 	groupings := [][2]string{
 		{"superadmin", "admin"},
-		{"cs", "staff"},
-		{"billing", "staff"},
 		{"technician", "staff"},
+		{"sales_agent", "staff"},
 	}
 	for _, g := range groupings {
 		if has, _ := e.HasGroupingPolicy(g[0], g[1]); !has {

@@ -280,7 +280,7 @@ func TestCreateUser_NilBearerKey(t *testing.T) {
 	user := &model.User{
 		FullName: "Test User",
 		Email:    "test@example.com",
-		Role:     "cs",
+		Role:     "technician",
 		IsActive: true,
 	}
 

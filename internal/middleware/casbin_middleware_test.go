@@ -41,9 +41,8 @@ func newTestEnforcer(t *testing.T) *casbincore.Enforcer {
 
 	_, _ = e.AddGroupingPolicy("superadmin", "admin")
 	_, _ = e.AddGroupingPolicy("admin", "admin")
-	_, _ = e.AddGroupingPolicy("cs", "staff")
-	_, _ = e.AddGroupingPolicy("billing", "staff")
 	_, _ = e.AddGroupingPolicy("technician", "staff")
+	_, _ = e.AddGroupingPolicy("sales_agent", "staff")
 
 	_, _ = e.AddPolicy("admin", "/api/v1/*", ".*")
 	_, _ = e.AddPolicy("staff", "/api/v1/auth/*", "GET|POST")
@@ -89,7 +88,7 @@ func TestCasbin_AdminAllowed(t *testing.T) {
 
 func TestCasbin_StaffAllowed_Invoice(t *testing.T) {
 	e := newTestEnforcer(t)
-	r := buildCasbinRouter(e, "cs", true)
+	r := buildCasbinRouter(e, "technician", true)
 
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest(http.MethodPost, "/api/v1/payments", nil)
@@ -100,7 +99,7 @@ func TestCasbin_StaffAllowed_Invoice(t *testing.T) {
 
 func TestCasbin_StaffBlocked_Users(t *testing.T) {
 	e := newTestEnforcer(t)
-	r := buildCasbinRouter(e, "cs", true)
+	r := buildCasbinRouter(e, "technician", true)
 
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest(http.MethodGet, "/api/v1/users", nil)
@@ -111,7 +110,7 @@ func TestCasbin_StaffBlocked_Users(t *testing.T) {
 
 func TestCasbin_StaffBlocked_Routers(t *testing.T) {
 	e := newTestEnforcer(t)
-	r := buildCasbinRouter(e, "billing", true)
+	r := buildCasbinRouter(e, "sales_agent", true)
 
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest(http.MethodGet, "/api/v1/routers", nil)
@@ -122,7 +121,7 @@ func TestCasbin_StaffBlocked_Routers(t *testing.T) {
 
 func TestCasbin_CustomerAllowed_Invoice(t *testing.T) {
 	e := newTestEnforcer(t)
-	r := buildCasbinRouter(e, "cs", true)
+	r := buildCasbinRouter(e, "sales_agent", true)
 
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest(http.MethodGet, "/api/v1/invoices", nil)
@@ -133,11 +132,9 @@ func TestCasbin_CustomerAllowed_Invoice(t *testing.T) {
 
 func TestCasbin_CustomerBlocked_Trigger(t *testing.T) {
 	e := newTestEnforcer(t)
-	r := buildCasbinRouter(e, "cs", true)
+	r := buildCasbinRouter(e, "technician", true)
 
-	// cs (staff) cannot DELETE — staff invoice policy only allows GET|POST|PUT|DELETE but
-	// trigger-monthly is under /api/v1/invoices/* which allows DELETE for staff.
-	// Let's test something staff cannot do: DELETE on /api/v1/customers (only GET allowed)
+	// technician (staff) cannot DELETE customers — staff policy only allows GET on /api/v1/customers
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest(http.MethodDelete, "/api/v1/customers/some-id", nil)
 	r.ServeHTTP(w, req)

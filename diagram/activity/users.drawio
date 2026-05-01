@@ -1,0 +1,217 @@
+<mxfile host="65bd71144e">
+    <diagram id="JezPAXuRt4k-U_-HhXrX" name="Page-1">
+        <mxGraphModel dx="3225" dy="2569" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+
+                <!-- CREATE USER -->
+                <mxCell id="lbl_add" value="Create" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+                    <mxGeometry x="60" y="-302" width="60" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="au" value="Super Admin" style="swimlane;whiteSpace=wrap;html=1;startSize=40;fillColor=#f5f5f5;fontColor=#333333;strokeColor=#666666;" vertex="1" parent="1">
+                    <mxGeometry x="30" y="-260" width="300" height="680" as="geometry"/>
+                </mxCell>
+                <mxCell id="au_start" value="" style="ellipse;aspect=fixed;fillColor=#000000;strokeColor=#000000;" vertex="1" parent="au">
+                    <mxGeometry x="136" y="80" width="28" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="au_input" value="Input Data&#xa;(Nama, Email, Password, Role)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;arcSize=30;" vertex="1" parent="au">
+                    <mxGeometry x="80" y="140" width="140" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="au_err_email" value="Error: Email sudah terdaftar" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;arcSize=30;" vertex="1" parent="au">
+                    <mxGeometry x="80" y="330" width="140" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="au_success" value="Berhasil: User Terdaftar" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;arcSize=30;" vertex="1" parent="au">
+                    <mxGeometry x="80" y="560" width="140" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="au_end" value="" style="shape=doubleEllipse;aspect=fixed;fillColor=#000000;strokeColor=#000000;" vertex="1" parent="au">
+                    <mxGeometry x="136" y="640" width="28" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_au1" style="edgeStyle=none;html=1;" edge="1" parent="au" source="au_start" target="au_input">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_au_end" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="au" source="au_success" target="au_end">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+
+                <mxCell id="as" value="Sistem (RBAC Logic)" style="swimlane;whiteSpace=wrap;html=1;startSize=40;fillColor=#f5f5f5;fontColor=#333333;strokeColor=#666666;" vertex="1" parent="1">
+                    <mxGeometry x="330" y="-260" width="300" height="680" as="geometry"/>
+                </mxCell>
+                <mxCell id="as_validate" value="Validasi Format Input" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;arcSize=30;" vertex="1" parent="as">
+                    <mxGeometry x="65" y="140" width="170" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="as_check_email" value="Cek Duplikasi Email" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;arcSize=30;" vertex="1" parent="as">
+                    <mxGeometry x="65" y="220" width="170" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="as_q_email" value="Email Sudah Ada?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="as">
+                    <mxGeometry x="90" y="300" width="120" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="as_hash" value="Hash Password (bcrypt)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;arcSize=30;" vertex="1" parent="as">
+                    <mxGeometry x="65" y="400" width="170" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="as_save" value="Simpan User &amp; Assign Role (Casbin)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;arcSize=30;" vertex="1" parent="as">
+                    <mxGeometry x="65" y="480" width="170" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_as1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="as" source="as_validate" target="as_check_email">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_as2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="as" source="as_check_email" target="as_q_email">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_as3" value="Tidak" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#82b366;fontColor=#82b366;fontStyle=1;" edge="1" parent="as" source="as_q_email" target="as_hash">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_as4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="as" source="as_hash" target="as_save">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+
+                <mxCell id="e_cross_au1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="au_input" target="as_validate">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_cross_au2" value="Ya" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#b85450;fontColor=#b85450;fontStyle=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="as_q_email" target="au_err_email">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_cross_au3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="as_save" target="au_success">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+
+                <!-- EDIT USER -->
+                <mxCell id="lbl_edit" value="Edit" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+                    <mxGeometry x="700" y="-302" width="60" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="eu" value="Super Admin" style="swimlane;whiteSpace=wrap;html=1;startSize=40;fillColor=#f5f5f5;fontColor=#333333;strokeColor=#666666;" vertex="1" parent="1">
+                    <mxGeometry x="660" y="-260" width="300" height="680" as="geometry"/>
+                </mxCell>
+                <mxCell id="eu_start" value="" style="ellipse;aspect=fixed;fillColor=#000000;strokeColor=#000000;" vertex="1" parent="eu">
+                    <mxGeometry x="136" y="80" width="28" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="eu_select" value="Pilih User" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;arcSize=30;" vertex="1" parent="eu">
+                    <mxGeometry x="80" y="140" width="140" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="eu_input" value="Edit Data &amp; Role" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;arcSize=30;" vertex="1" parent="eu">
+                    <mxGeometry x="80" y="300" width="140" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="eu_err" value="Error: Data tidak valid" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;arcSize=30;" vertex="1" parent="eu">
+                    <mxGeometry x="80" y="400" width="140" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="eu_success" value="Berhasil: Data Diperbarui" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;arcSize=30;" vertex="1" parent="eu">
+                    <mxGeometry x="80" y="560" width="140" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="eu_end" value="" style="shape=doubleEllipse;aspect=fixed;fillColor=#000000;strokeColor=#000000;" vertex="1" parent="eu">
+                    <mxGeometry x="136" y="640" width="28" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_eu1" style="edgeStyle=none;html=1;" edge="1" parent="eu" source="eu_start" target="eu_select">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_eu_end" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="eu" source="eu_success" target="eu_end">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+
+                <mxCell id="es" value="Sistem (RBAC Logic)" style="swimlane;whiteSpace=wrap;html=1;startSize=40;fillColor=#f5f5f5;fontColor=#333333;strokeColor=#666666;" vertex="1" parent="1">
+                    <mxGeometry x="960" y="-260" width="300" height="680" as="geometry"/>
+                </mxCell>
+                <mxCell id="es_fetch" value="Ambil Data User by ID" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;arcSize=30;" vertex="1" parent="es">
+                    <mxGeometry x="65" y="140" width="170" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="es_validate" value="Validasi Data Baru" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;arcSize=30;" vertex="1" parent="es">
+                    <mxGeometry x="65" y="300" width="170" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="es_q_valid" value="Data Valid?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="es">
+                    <mxGeometry x="90" y="380" width="120" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="es_update" value="Update Data User" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;arcSize=30;" vertex="1" parent="es">
+                    <mxGeometry x="65" y="480" width="170" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_es1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="es" source="es_fetch" target="es_validate">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_es2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="es" source="es_validate" target="es_q_valid">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_es3" value="Ya" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#82b366;fontColor=#82b366;fontStyle=1;" edge="1" parent="es" source="es_q_valid" target="es_update">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+
+                <mxCell id="e_cross_eu1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="eu_select" target="es_fetch">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_cross_eu2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="es_fetch" target="eu_input">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_cross_eu3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="eu_input" target="es_validate">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_cross_eu4" value="Tidak" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#b85450;fontColor=#b85450;fontStyle=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="es_q_valid" target="eu_err">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_cross_eu5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="es_update" target="eu_success">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+
+                <!-- DELETE USER -->
+                <mxCell id="lbl_del" value="Delete" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+                    <mxGeometry x="30" y="460" width="60" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="du" value="Super Admin" style="swimlane;whiteSpace=wrap;html=1;startSize=40;fillColor=#f5f5f5;fontColor=#333333;strokeColor=#666666;" vertex="1" parent="1">
+                    <mxGeometry x="30" y="500" width="300" height="620" as="geometry"/>
+                </mxCell>
+                <mxCell id="du_start" value="" style="ellipse;aspect=fixed;fillColor=#000000;strokeColor=#000000;" vertex="1" parent="du">
+                    <mxGeometry x="136" y="60" width="28" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="du_select" value="Pilih User untuk Dihapus" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;arcSize=30;" vertex="1" parent="du">
+                    <mxGeometry x="80" y="120" width="140" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="du_err_self" value="Error: Tidak bisa hapus&#xa;diri sendiri" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;arcSize=30;" vertex="1" parent="du">
+                    <mxGeometry x="80" y="330" width="140" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="du_success" value="Berhasil: User Dihapus" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;arcSize=30;" vertex="1" parent="du">
+                    <mxGeometry x="80" y="510" width="140" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="du_end" value="" style="shape=doubleEllipse;aspect=fixed;fillColor=#000000;strokeColor=#000000;" vertex="1" parent="du">
+                    <mxGeometry x="136" y="580" width="28" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_du1" style="edgeStyle=none;html=1;" edge="1" parent="du" source="du_start" target="du_select">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_du_end" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="du" source="du_success" target="du_end">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+
+                <mxCell id="ds" value="Sistem (RBAC Logic)" style="swimlane;whiteSpace=wrap;html=1;startSize=40;fillColor=#f5f5f5;fontColor=#333333;strokeColor=#666666;" vertex="1" parent="1">
+                    <mxGeometry x="330" y="500" width="300" height="620" as="geometry"/>
+                </mxCell>
+                <mxCell id="ds_check" value="Cek User = Diri Sendiri?" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;arcSize=30;" vertex="1" parent="ds">
+                    <mxGeometry x="65" y="120" width="170" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="ds_q_self" value="Hapus Akun Sendiri?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="ds">
+                    <mxGeometry x="90" y="200" width="120" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="ds_soft_del" value="Soft Delete User&#xa;(set deleted_at)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;arcSize=30;" vertex="1" parent="ds">
+                    <mxGeometry x="65" y="400" width="170" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="ds_revoke" value="Revoke Role / Izin" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;arcSize=30;" vertex="1" parent="ds">
+                    <mxGeometry x="65" y="480" width="170" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_ds1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="ds" source="ds_check" target="ds_q_self">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_ds2" value="Tidak" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#82b366;fontColor=#82b366;fontStyle=1;" edge="1" parent="ds" source="ds_q_self" target="ds_soft_del">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_ds3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="ds" source="ds_soft_del" target="ds_revoke">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+
+                <mxCell id="e_cross_du1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="du_select" target="ds_check">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_cross_du2" value="Ya" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#b85450;fontColor=#b85450;fontStyle=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="ds_q_self" target="du_err_self">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_cross_du3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="ds_revoke" target="du_success">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

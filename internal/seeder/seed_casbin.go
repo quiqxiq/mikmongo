@@ -12,9 +12,8 @@ func (s *Seeder) seedCasbin(ctx context.Context) error {
 	// Role groupings: (ptype='g', v0=role, v1=parentRole)
 	groupings := [][2]string{
 		{"superadmin", "admin"},
-		{"cs", "staff"},
-		{"billing", "staff"},
 		{"technician", "staff"},
+		{"sales_agent", "staff"},
 	}
 	for _, g := range groupings {
 		_, err := s.db.ExecContext(ctx, `

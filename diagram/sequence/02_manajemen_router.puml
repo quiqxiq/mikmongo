@@ -1,0 +1,184 @@
+@startuml
+!theme mars
+autonumber
+skinparam sequenceMessageAlign center
+
+' Definisi Partisipan
+actor "Admin/Teknisi" as User
+boundary "Router Page" as UI
+control "Sistem (Backend)" as System
+database "Database(routers)" as DB
+participant "MikroTik Router" as MT
+
+' ================= FLOW 1: TAMBAH ROUTER =================
+group Tambah Router Baru
+    User -> UI : Input data (Nama, IP, Port, User, Password)
+    activate UI
+    UI -> UI : Validasi format input
+    UI -> System : POST /api/routers {data}
+    deactivate UI
+    activate System
+    
+    System -> DB : Cek IP/Name unik
+    activate DB
+    DB --> System : Return hasil cek
+    deactivate DB
+    
+    alt Data sudah ada
+        System --> UI : Return error: "Router sudah terdaftar"
+        deactivate System
+        activate UI
+        UI --> User : Tampilkan pesan error
+        deactivate UI
+    else Data unik
+        System -> DB : INSERT routers (status=checking)
+        activate DB
+        DB --> System : Return router_id
+        deactivate DB
+        
+        System -> MT : API Test: /system/resource/print
+        activate MT
+        
+        alt Koneksi Berhasil
+            MT --> System : Return RouterOS Info
+            deactivate MT
+            System -> DB : UPDATE status=online
+            activate DB
+            DB --> System : Update berhasil
+            deactivate DB
+            System --> UI : Return {success: true, status: "online"}
+            deactivate System
+            activate UI
+            UI --> User : Tampilkan "Router terhubung & tersimpan"
+            deactivate UI
+        else Koneksi Gagal/Timeout
+            MT --> System : Return error: unreachable
+            deactivate MT
+            System -> DB : UPDATE status=offline
+            activate DB
+            DB --> System : Update berhasil
+            deactivate DB
+            System --> UI : Return warning: "Tersimpan, koneksi gagal"
+            deactivate System
+            activate UI
+            UI --> User : Tampilkan "Perlu cek jaringan/kredensial"
+            deactivate UI
+        end
+    end
+end
+
+' ================= FLOW 2: UJI KONEKSI (MANUAL TEST) =================
+group Uji Koneksi Router
+    User -> UI : Pilih router & klik "Test Koneksi"
+    activate UI
+    UI -> System : POST /api/routers/{id}/test
+    deactivate UI
+    activate System
+    
+    System -> DB : GET router credentials
+    activate DB
+    DB --> System : Return IP, port, user, pass_enc
+    deactivate DB
+    
+    System -> System : Decrypt password & build API request
+    System -> MT : API Ping: /ping address=8.8.8.8
+    activate MT
+    MT --> System : Return ping result (latency, status)
+    deactivate MT
+    
+    System -> DB : UPDATE last_seen = NOW(), status based on result
+    activate DB
+    DB --> System : Update berhasil
+    deactivate DB
+    
+    System --> UI : Return {success: true, latency, status}
+    deactivate System
+    activate UI
+    UI --> User : Tampilkan hasil test (Online/Latency ms)
+    deactivate UI
+end
+
+' ================= FLOW 3: UPDATE ROUTER =================
+group Update Konfigurasi Router
+    User -> UI : Edit data router & klik Simpan
+    activate UI
+    UI -> System : PUT /api/routers/{id} {updated_data}
+    deactivate UI
+    activate System
+    
+    System -> DB : GET current router data
+    activate DB
+    DB --> System : Return existing data
+    deactivate DB
+    
+    System -> System : Compare changes & validate
+    alt Ada perubahan kredensial/IP
+        System -> MT : Re-verify connection with new credentials
+        activate MT
+        MT --> System : Return verification result
+        deactivate MT
+        alt Verifikasi gagal
+            System --> UI : Return error: "Koneksi gagal dengan data baru"
+            deactivate System
+            activate UI
+            UI --> User : Tampilkan "Update dibatalkan"
+            deactivate UI
+        end
+    end
+    
+    System -> DB : UPDATE routers {new_data}
+    activate DB
+    DB --> System : Update berhasil
+    deactivate DB
+    System --> UI : Return {success: true}
+    deactivate System
+    activate UI
+    UI --> User : Tampilkan "Konfigurasi router diperbarui"
+    deactivate UI
+end
+
+' ================= FLOW 4: HAPUS ROUTER =================
+group Hapus Router
+    User -> UI : Pilih router & klik "Hapus"
+    activate UI
+    UI -> System : DELETE /api/routers/{id}
+    deactivate UI
+    activate System
+    
+    System -> DB : Cek dependency (subscriptions/customers)
+    activate DB
+    DB --> System : Return usage count
+    deactivate DB
+    
+    alt Masih digunakan (>0)
+        System --> UI : Return error: "Router masih aktif digunakan customer"
+        deactivate System
+        activate UI
+        UI --> User : Tampilkan "Hapus gagal: Nonaktifkan customer dulu"
+        deactivate UI
+    else Tidak digunakan (0)
+        System -> MT : (Opsional) Cleanup session/API access
+        activate MT
+        MT --> System : Acknowledge
+        deactivate MT
+        
+        System -> DB : DELETE FROM routers WHERE id = ?
+        activate DB
+        DB --> System : Delete berhasil
+        deactivate DB
+        System --> UI : Return {success: true}
+        deactivate System
+        activate UI
+        UI --> User : Tampilkan "Router berhasil dihapus"
+        deactivate UI
+    end
+end
+
+note right of User
+  * Database: Menyimpan konfigurasi, status, & last_seen
+  * MikroTik: Dikomunikasi via RouterOS API (port 8728/8729)
+  * Password disimpan terenkripsi (AES) di database
+  * Status router: online, offline, checking, error
+end note
+
+@enduml

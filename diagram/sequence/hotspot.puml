@@ -1,0 +1,105 @@
+@startuml
+!theme mars
+autonumber
+skinparam sequenceMessageAlign center
+
+actor "Admin/Teknisi" as Admin
+boundary "Halaman Hotspot" as UI
+control "Sistem (Backend)" as System
+database "Database(hotspot_users, profiles, logs)" as DB
+participant "MikroTik Router" as MT
+
+' ================= FLOW 1: GENERATE VOUCHER =================
+group Generate Voucher Hotspot
+    Admin -> UI : 1. Input jumlah & pilih Hotspot Profile
+    activate UI
+    UI -> System : 2. POST /api/hotspot/generate {qty, profile_id}
+    deactivate UI
+    activate System
+
+    System -> DB : 3. GET profile parameters (speed, validity, price)
+    activate DB
+    DB --> System : 4. Return profile data
+    deactivate DB
+
+    System -> System : 5. Loop: Generate username/pass & hitung expired date
+    System -> DB : 6. INSERT batch ke tabel hotspot_users
+    activate DB
+    DB --> System : 7. Return generated IDs
+    deactivate DB
+
+    System -> DB : 8. INSERT ke laporan_penjualan (log transaksi)
+    activate DB
+    DB --> System : 9. Log tersimpan
+    deactivate DB
+
+    System -> MT : 10. API: /ip/hotspot/user/add (batch insert)
+    activate MT
+    MT --> System : 11. Return success/fail count
+    deactivate MT
+
+    System --> UI : 12. Return {success: true, vouchers: [...]}
+    deactivate System
+    activate UI
+    UI --> Admin : 13. Tampilkan daftar voucher siap cetak
+    deactivate UI
+end
+
+' ================= FLOW 2: CETAK VOUCHER =================
+group Cetak Voucher
+    Admin -> UI : 14. Pilih voucher & klik "Cetak"
+    activate UI
+    UI -> System : 15. GET /api/hotspot/vouchers/{id}/print
+    deactivate UI
+    activate System
+
+    System -> DB : 16. Query detail voucher & profile
+    activate DB
+    DB --> System : 17. Return formatted data
+    deactivate DB
+
+    System -> System : 18. Generate template PDF/HTML
+    System --> UI : 19. Return file stream / download URL
+    deactivate System
+    activate UI
+    UI --> Admin : 20. Download & Print Voucher
+    deactivate UI
+end
+
+' ================= FLOW 3: MONITORING ACTIVE SESSION =================
+group Monitoring Active & Update Status
+    Admin -> UI : 21. Refresh / Buka Dashboard Hotspot
+    activate UI
+    UI -> System : 22. GET /api/hotspot/active-sessions
+    deactivate UI
+    activate System
+
+    System -> MT : 23. API: /ip/hotspot/active/print
+    activate MT
+    MT --> System : 24. Return list active users (IP, MAC, Uptime)
+    deactivate MT
+
+    System -> System : 25. Match active sessions with DB hotspot_users
+    System -> DB : 26. UPDATE status='online', last_seen=NOW()
+    activate DB
+    DB --> System : 27. Update berhasil
+    deactivate DB
+
+    System -> DB : 28. UPDATE rekap laporan (voucher used count)
+    activate DB
+    DB --> System : 29. Update berhasil
+    deactivate DB
+
+    System --> UI : 30. Return {active_users: [...], stats: {...}}
+    deactivate System
+    activate UI
+    UI --> Admin : 31. Tampilkan user online & statistik real-time
+    deactivate UI
+end
+
+note right of Admin
+  * Voucher sync: DB <-> MikroTik /ip/hotspot/user
+  * Active monitoring: MikroTik /ip/hotspot/active -> System -> DB
+  * Laporan penjualan otomatis tercatat saat generate
+end note
+@enduml

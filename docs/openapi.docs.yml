@@ -75,6 +75,11 @@ tags:
     description: MikroTik queues, firewall, IP pools and addresses
   - name: MikroTik Monitor
     description: MikroTik system resource and interface monitoring
+  - name: MikroTik Collector
+    description: |
+      Cache-first reads from the collector pipeline (Redis hashes + Redis Streams)
+      and collector status endpoints. Data is populated by background collectors,
+      so endpoints here never touch the router directly.
   - name: MikroTik Raw
     description: Raw RouterOS command execution
   - name: Mikhmon Vouchers
@@ -253,7 +258,7 @@ components:
           type: string
         role:
           type: string
-          enum: [superadmin, admin, cs, billing, technician, readonly]
+          enum: [superadmin, admin, technician, sales_agent, customer]
         password:
           type: string
 
@@ -271,7 +276,7 @@ components:
           type: string
         role:
           type: string
-          enum: [superadmin, admin, cs, billing, technician, readonly]
+          enum: [superadmin, admin, technician, sales_agent, customer]
         is_active:
           type: boolean
         last_login:
@@ -6601,3 +6606,257 @@ paths:
                     properties:
                       data:
                         $ref: '#/components/schemas/ScriptResponse'
+
+  # ── MikroTik Collector (cache-first reads from Redis) ──────────────
+  /api/v1/routers/{router_id}/cached/ppp-active:
+    get:
+      tags: [MikroTik Collector]
+      summary: Get cached PPP active sessions
+      description: |
+        Returns active PPP sessions from the Redis hash populated by the
+        collector pipeline. Reads key `{router_id}:ppp:active` and returns
+        each hash value as a JSON object. Does not touch the router directly.
+      operationId: getCachedPPPActive
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/RouterIdPath'
+      responses:
+        '200':
+          description: Cached PPP active sessions
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          type: object
+                          additionalProperties: true
+                          description: Raw PPP active entry as stored by the collector
+        '400':
+          description: Missing router_id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Failed to read cache
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/routers/{router_id}/cached/hotspot-active:
+    get:
+      tags: [MikroTik Collector]
+      summary: Get cached hotspot active sessions
+      description: |
+        Returns active hotspot users from the Redis hash populated by the
+        collector pipeline. Reads key `{router_id}:hotspot:active`.
+      operationId: getCachedHotspotActive
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/RouterIdPath'
+      responses:
+        '200':
+          description: Cached hotspot active sessions
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          type: object
+                          additionalProperties: true
+                          description: Raw hotspot active entry as stored by the collector
+        '400':
+          description: Missing router_id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Failed to read cache
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/routers/{router_id}/cached/ppp-secrets:
+    get:
+      tags: [MikroTik Collector]
+      summary: Get cached PPP secrets
+      description: |
+        Returns PPP secrets from the Redis hash populated by the collector
+        pipeline. Reads key `{router_id}:ppp:secrets`.
+      operationId: getCachedPPPSecrets
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/RouterIdPath'
+      responses:
+        '200':
+          description: Cached PPP secrets
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          type: object
+                          additionalProperties: true
+                          description: Raw PPP secret entry as stored by the collector
+        '400':
+          description: Missing router_id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Failed to read cache
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/routers/{router_id}/cached/queue-stats:
+    get:
+      tags: [MikroTik Collector]
+      summary: Get cached queue statistics
+      description: |
+        Returns simple-queue statistics from the Redis hash populated by the
+        collector pipeline. Reads key `{router_id}:queue:stats`.
+      operationId: getCachedQueueStats
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/RouterIdPath'
+      responses:
+        '200':
+          description: Cached queue statistics
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          type: object
+                          additionalProperties: true
+                          description: Raw queue stats entry as stored by the collector
+        '400':
+          description: Missing router_id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Failed to read cache
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/routers/{router_id}/logs:
+    get:
+      tags: [MikroTik Collector]
+      summary: Get router logs from Redis Stream
+      description: |
+        Reads the latest router log entries from a Redis Stream using
+        XREVRANGE (newest first). Stream key is `{router_id}:router:log`.
+      operationId: getRouterLogs
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/RouterIdPath'
+        - name: count
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 50
+            minimum: 1
+            maximum: 500
+          description: Number of log entries to return (newest first)
+      responses:
+        '200':
+          description: Router log entries
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              description: Redis Stream entry ID (e.g. `1712000000000-0`)
+                            timestamp:
+                              type: string
+                              description: Timestamp field from the log entry, if present
+                            message:
+                              type: string
+                              description: Message field from the log entry, if present
+                            fields:
+                              type: object
+                              additionalProperties:
+                                type: string
+                              description: Remaining free-form string fields from the log entry
+        '400':
+          description: Missing router_id or invalid count
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Failed to read log stream
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/routers/{router_id}/collector/status:
+    get:
+      tags: [MikroTik Collector]
+      summary: Get collector status
+      description: |
+        Returns the status of all active collectors for this router. The shape
+        of each status entry depends on the collector service implementation.
+      operationId: getCollectorStatus
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/RouterIdPath'
+      responses:
+        '200':
+          description: Collector status snapshot
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+                    description: Collector status payload keyed by collector name
