@@ -1,69 +1,209 @@
 @startuml
-!theme plain
-skinparam sequenceArrowThickness 1.5
-skinparam roundCorner 6
-skinparam ParticipantPadding 15
-skinparam defaultFontSize 12
+!theme mars
+autonumber
+skinparam sequenceMessageAlign center
 
-actor "Admin" as Admin
-participant "Frontend" as FE
-boundary "Server API" as API
-control "Layanan\nPengguna" as Svc
-database "Database" as DB
-
+actor "Super Admin" as Admin
+boundary "Halaman\nManajemen User" as UI
+control "Sistem" as System
+participant "Casbin\nRBAC" as RBAC
+database "DB Users" as DB
 
 == Lihat Daftar Pengguna ==
-Admin -> FE : Buka menu Pengguna
-FE -> API : GET /users
-activate API
-API -> Svc : DaftarPengguna()
-activate Svc
-Svc -> DB : Ambil data pengguna
-DB --> Svc : Daftar pengguna
-Svc --> API : Data pengguna
-deactivate Svc
-API --> FE : 200 OK
-deactivate API
-FE --> Admin : Tampilkan tabel
 
-== Tambah Pengguna ==
-Admin -> FE : Isi formulir pengguna baru
-FE -> API : POST /users
-activate API
-API -> Svc : BuatPengguna(data)
-activate Svc
-Svc -> DB : Cek email & simpan pengguna
-DB --> Svc : Pengguna tersimpan
-Svc --> API : Data pengguna baru
-deactivate Svc
-API --> FE : 201 Created
-deactivate API
-FE --> Admin : Pengguna berhasil ditambahkan
+Admin -> UI : Buka menu Manajemen User
+activate UI
+UI -> System : GET /api/users
+deactivate UI
+activate System
 
-== Ubah Pengguna ==
-Admin -> FE : Edit data pengguna
-FE -> API : PUT /users/:id
-activate API
-API -> Svc : UbahPengguna(id, data)
-activate Svc
-Svc -> DB : Simpan perubahan
-Svc --> API : Data terbaru
-deactivate Svc
-API --> FE : 200 OK
-deactivate API
-FE --> Admin : Perubahan tersimpan
+System -> DB : Ambil daftar pengguna
+activate DB
+DB --> System : Kembalikan daftar pengguna
+deactivate DB
+
+System --> UI : 200 OK + data pengguna
+deactivate System
+activate UI
+UI --> Admin : Tampilkan tabel daftar pengguna
+deactivate UI
+
+== Tambah Pengguna Baru & Assign Role ==
+
+Admin -> UI : Input data\n(Nama, Email, Password, Role)
+activate UI
+UI -> System : POST /api/users
+deactivate UI
+activate System
+
+System -> System : Validasi format input
+System -> DB : Cek duplikasi email
+activate DB
+DB --> System : Status unik/duplikat
+deactivate DB
+
+alt Email Sudah Terdaftar
+    System --> UI : Error: Email sudah terdaftar
+    deactivate System
+    activate UI
+    UI --> Admin : Tampilkan pesan error
+    deactivate UI
+else Email Unik
+    System -> System : Hash password (bcrypt)
+    System -> DB : INSERT users
+    activate DB
+    DB --> System : Kembalikan user_id
+    deactivate DB
+
+    System -> RBAC : Assign Role ke User
+    activate RBAC
+    RBAC -> DB : INSERT casbin_rules
+    activate DB
+    DB --> RBAC : Berhasil
+    deactivate DB
+    RBAC --> System : Role di-assign
+    deactivate RBAC
+
+    System --> UI : 201 Created
+    deactivate System
+    activate UI
+    UI --> Admin : Pengguna berhasil ditambahkan
+    deactivate UI
+end
+
+== Ubah Data Pengguna ==
+
+Admin -> UI : Pilih pengguna yang akan diubah
+activate UI
+UI -> System : GET /api/users/:id
+deactivate UI
+activate System
+
+System -> DB : Ambil data pengguna by ID
+activate DB
+DB --> System : Kembalikan data pengguna
+deactivate DB
+
+System --> UI : Data pengguna
+deactivate System
+activate UI
+UI --> Admin : Tampilkan form edit
+deactivate UI
+
+Admin -> UI : Edit data & role, klik Simpan
+activate UI
+UI -> System : PUT /api/users/:id
+deactivate UI
+activate System
+
+System -> System : Validasi data baru
+alt Data Tidak Valid
+    System --> UI : Error: Data tidak valid
+    deactivate System
+    activate UI
+    UI --> Admin : Tampilkan pesan error
+    deactivate UI
+else Data Valid
+    System -> DB : UPDATE users
+    activate DB
+    DB --> System : Pembaruan berhasil
+    deactivate DB
+
+    System -> RBAC : Perbarui role jika berubah
+    activate RBAC
+    RBAC -> DB : UPDATE casbin_rules
+    activate DB
+    DB --> RBAC : Berhasil
+    deactivate DB
+    RBAC --> System : Role diperbarui
+    deactivate RBAC
+
+    System --> UI : 200 OK
+    deactivate System
+    activate UI
+    UI --> Admin : Data pengguna diperbarui
+    deactivate UI
+end
 
 == Hapus Pengguna ==
-Admin -> FE : Hapus pengguna
-FE -> API : DELETE /users/:id
-activate API
-API -> Svc : HapusPengguna(id)
-activate Svc
-Svc -> DB : Soft delete
-Svc --> API : Berhasil
-deactivate Svc
-API --> FE : 200 OK
-deactivate API
-FE --> Admin : Pengguna dihapus
+
+Admin -> UI : Pilih pengguna untuk dihapus
+activate UI
+UI -> System : DELETE /api/users/:id
+deactivate UI
+activate System
+
+System -> System : Cek apakah menghapus\nakun sendiri
+alt Menghapus Akun Sendiri
+    System --> UI : Error: Tidak bisa menghapus\nakun sendiri
+    deactivate System
+    activate UI
+    UI --> Admin : Tampilkan pesan error
+    deactivate UI
+else Bukan Akun Sendiri
+    System -> DB : Soft delete user
+    activate DB
+    DB --> System : Berhasil
+    deactivate DB
+
+    System -> RBAC : Cabut semua role & izin
+    activate RBAC
+    RBAC -> DB : DELETE casbin_rules
+    activate DB
+    DB --> RBAC : Berhasil
+    deactivate DB
+    RBAC --> System : Role dicabut
+    deactivate RBAC
+
+    System --> UI : 200 OK
+    deactivate System
+    activate UI
+    UI --> Admin : Pengguna berhasil dihapus
+    deactivate UI
+end
+
+== Validasi Hak Akses (RBAC) ==
+
+Admin -> UI : Akses menu tertentu
+activate UI
+UI -> System : Request + Bearer Token
+deactivate UI
+activate System
+
+System -> System : Decode token,\nambil user_id & role
+
+System -> RBAC : Enforce(user_id, resource, action)
+activate RBAC
+RBAC -> DB : Query policy
+activate DB
+DB --> RBAC : allow/deny
+deactivate DB
+RBAC --> System : Hasil (true/false)
+deactivate RBAC
+
+alt Akses Diizinkan
+    System -> DB : Query data yang diminta
+    activate DB
+    DB --> System : Kembalikan data
+    deactivate DB
+    System --> UI : 200 OK + data
+    deactivate System
+    activate UI
+    UI --> Admin : Tampilkan halaman
+    deactivate UI
+else Akses Ditolak
+    System --> UI : 403 Forbidden
+    deactivate System
+    activate UI
+    UI --> Admin : Tampilkan "Akses Ditolak"
+    deactivate UI
+end
+
+note right of Admin
+  User memiliki Role (admin/teknisi).
+  Casbin mengecek izin setiap aksi.
+  Soft delete: ditandai deleted_at.
+  Password di-hash dengan bcrypt.
+end note
 
 @enduml

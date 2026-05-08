@@ -4,122 +4,174 @@ autonumber
 skinparam sequenceMessageAlign center
 
 ' Definisi Partisipan
-actor "Admin / Customer" as User
-boundary "Billing Page" as UI
+actor "Admin" as User
+boundary "Halaman Billing" as UI
 control "Sistem (Backend)" as System
-database "Database(invoices)" as DB
+database "Database (invoices, subscriptions)" as DB
 participant "MikroTik Router" as MT
+participant "Xendit (Payment Gateway)" as PG
+participant "WA Gateway" as WA
 
 ' ================= FLOW 1: GENERATE TAGIHAN (CRON) =================
 group Generate Tagihan Bulanan (Cron Job)
-    System -> System : Trigger Harian (Cron Scheduler)
-    
-    System -> DB : Cek langganan jatuh tempo hari ini
+    System -> System : Trigger harian (Cron Scheduler)
+
+    System -> DB : Cek langganan yang jatuh tempo hari ini
     activate DB
-    DB --> System : Return list subscription
+    DB --> System : Kembalikan daftar subscription
     deactivate DB
-    
-    loop Untuk setiap langganan
-        System -> System : Hitung nominal & buat Invoice
-        System -> DB : INSERT invoices (status='pending')
+
+    loop Untuk setiap langganan jatuh tempo
+        System -> System : Hitung nominal tagihan
+        System -> DB : INSERT invoices (status='unpaid')
         activate DB
-        DB --> System : ID Invoice tersimpan
+        DB --> System : Kembalikan invoice_id
         deactivate DB
-        System -> System : Kirim Notif Tagihan (WA/Email)
+
+        System -> WA : Kirim notifikasi tagihan ke pelanggan
+        activate WA
+        WA --> System : Notifikasi terkirim
+        deactivate WA
     end
-    
-    System -> System : Selesai Generate
+
+    System -> System : Proses generate selesai
 end
 
-' ================= FLOW 2: PEMBAYARAN & VERIFIKASI =================
-group Pembayaran Layanan
-    User -> UI : Upload Bukti Pembayaran
+' ================= FLOW 2: PEMBAYARAN VIA PAYMENT GATEWAY =================
+group Pembayaran Layanan (via Xendit)
+    User -> UI : Pilih invoice & klik "Buat Link Pembayaran"
     activate UI
-    UI -> System : POST /api/payments {invoice_id, proof}
+    UI -> System : POST /api/invoices/:id/pay
     deactivate UI
     activate System
-    
-    System -> System : Validasi Bukti Bayar
-    alt Bukti Valid
-        System -> DB : UPDATE invoices SET status='paid'
-        activate DB
-        DB --> System : Update berhasil
-        deactivate DB
-        
-        System -> UI : Return {success: true}
-        deactivate System
-        activate UI
-        UI --> User : Tampilkan "Pembayaran Diterima"
-        deactivate UI
-    else Bukti Tidak Valid
-        System --> UI : Return {error: "Bukti tidak sesuai"}
-        deactivate System
-        activate UI
-        UI --> User : Tampilkan "Gagal Verifikasi"
-        deactivate UI
-    end
-end
 
-' ================= FLOW 3: ISOLASI (JATUH TEMPO) =================
-group Isolasi Customer (Jatuh Tempo)
-    System -> System : Trigger Harian (Cron Isolasi)
-    
-    System -> DB : Cek Invoice Unpaid yang melewati due_date
+    System -> DB : Ambil detail invoice
     activate DB
-    DB --> System : Return list overdue
+    DB --> System : Kembalikan data invoice
     deactivate DB
-    
-    loop Untuk setiap customer overdue
-        System -> MT : API: /ppp/secret/set {disabled=yes}
-        activate MT
-        MT --> System : Return OK (Secret Disabled)
-        deactivate MT
-        
-        System -> DB : UPDATE customers SET status='isolated'
-        activate DB
-        DB --> System : Update berhasil
-        deactivate DB
-        
-        System -> System : Catat Log Isolasi
-    end
-    
-    System -> System : Selesai Isolasi
-end
 
-' ================= FLOW 4: UN-ISOLASI (PEMBAYARAN LUNAS) =================
-group Un-Isolasi (Auto Active)
-    User -> UI : Klik "Lunasi" (Setelah verifikasi manual)
-    activate UI
-    UI -> System : POST /api/unisolate {customer_id}
-    deactivate UI
-    activate System
-    
-    System -> DB : Cek status invoice
+    System -> PG : Buat payment request (amount, invoice_id)
+    activate PG
+    PG --> System : Kembalikan payment_url
+    deactivate PG
+
+    System -> DB : UPDATE invoices (payment_url, status='waiting_payment')
     activate DB
-    DB --> System : Confirm status='paid'
+    DB --> System : Pembaruan berhasil
     deactivate DB
-    
-    System -> MT : API: /ppp/secret/set {disabled=no}
-    activate MT
-    MT --> System : Return OK (Secret Enabled)
-    deactivate MT
-    
-    System -> DB : UPDATE customers SET status='active'
-    activate DB
-    DB --> System : Update berhasil
-    deactivate DB
-    
-    System --> UI : Return {success: true, message: "Customer Aktif Kembali"}
+
+    System --> UI : Kembalikan {success: true, payment_url}
     deactivate System
     activate UI
-    UI --> User : Tampilkan "Layanan Dipulihkan"
+    UI --> User : Tampilkan link pembayaran
+    deactivate UI
+end
+
+' ================= FLOW 3: CALLBACK PEMBAYARAN =================
+group Callback Pembayaran (Webhook Xendit)
+    PG -> System : POST /api/webhooks/xendit {status, invoice_id}
+    activate System
+
+    System -> System : Verifikasi signature webhook
+
+    alt Pembayaran Berhasil
+        System -> DB : UPDATE invoices SET status='paid', paid_at=NOW()
+        activate DB
+        DB --> System : Pembaruan berhasil
+        deactivate DB
+
+        System -> MT : Aktifkan PPP Secret (disabled=no)
+        activate MT
+        MT --> System : Berhasil
+        deactivate MT
+
+        System -> DB : UPDATE subscription status='active'
+        activate DB
+        DB --> System : Pembaruan berhasil
+        deactivate DB
+
+        System -> WA : Kirim konfirmasi pembayaran ke pelanggan
+        activate WA
+        WA --> System : Terkirim
+        deactivate WA
+
+    else Pembayaran Gagal / Kadaluarsa
+        System -> DB : UPDATE invoices SET status='failed'
+        activate DB
+        DB --> System : Pembaruan berhasil
+        deactivate DB
+    end
+
+    System --> PG : Kembalikan 200 OK (acknowledge)
+    deactivate System
+end
+
+' ================= FLOW 4: ISOLASI (JATUH TEMPO) =================
+group Isolasi Customer Otomatis (Cron Job)
+    System -> System : Trigger harian (Cron Isolasi)
+
+    System -> DB : Cek invoice unpaid yang melewati due_date
+    activate DB
+    DB --> System : Kembalikan daftar overdue
+    deactivate DB
+
+    loop Untuk setiap pelanggan overdue
+        System -> MT : Nonaktifkan PPP Secret (disabled=yes)
+        activate MT
+        MT --> System : PPP Secret dinonaktifkan
+        deactivate MT
+
+        System -> DB : UPDATE subscription SET status='isolated'
+        activate DB
+        DB --> System : Pembaruan berhasil
+        deactivate DB
+
+        System -> WA : Kirim notifikasi isolasi ke pelanggan
+        activate WA
+        WA --> System : Terkirim
+        deactivate WA
+
+        System -> System : Catat log isolasi
+    end
+
+    System -> System : Proses isolasi selesai
+end
+
+' ================= FLOW 5: UN-ISOLASI (PEMBAYARAN LUNAS) =================
+group Un-Isolasi (Pemulihan Layanan)
+    User -> UI : Klik "Pulihkan Layanan" pada pelanggan terisolasi
+    activate UI
+    UI -> System : POST /api/subscriptions/:id/unisolate
+    deactivate UI
+    activate System
+
+    System -> DB : Cek status invoice terkait
+    activate DB
+    DB --> System : Konfirmasi status='paid'
+    deactivate DB
+
+    System -> MT : Aktifkan PPP Secret (disabled=no)
+    activate MT
+    MT --> System : PPP Secret diaktifkan kembali
+    deactivate MT
+
+    System -> DB : UPDATE subscription SET status='active'
+    activate DB
+    DB --> System : Pembaruan berhasil
+    deactivate DB
+
+    System --> UI : Kembalikan {success: true, message: "Layanan dipulihkan"}
+    deactivate System
+    activate UI
+    UI --> User : Tampilkan "Layanan pelanggan aktif kembali"
     deactivate UI
 end
 
 note right of User
-  * Cron Job: Proses otomatis di background
-  * Isolasi: Mematikan akses PPPoE di MikroTik
-  * Database: Mencatat riwayat keuangan (Invoices)
+  * Cron Job: Generate tagihan & isolasi otomatis
+  * Xendit: Payment gateway untuk pembayaran online
+  * Isolasi: Menonaktifkan PPP Secret di MikroTik
+  * Notifikasi dikirim via WhatsApp di setiap tahap
 end note
 
 @enduml

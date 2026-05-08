@@ -3,73 +3,73 @@
 autonumber
 skinparam sequenceMessageAlign center
 
-' Definisi Partisipan
-actor "Admin/Teknisi" as User
-boundary "Login Page" as UI
+actor "Pengguna" as User
+boundary "Halaman Login" as UI
 boundary "Dashboard" as Dash
-control "Sistem (Backend)" as System
-database "Database(users)" as DB
+control "Sistem" as System
+database "DB Users" as DB
 
-User -> UI : 1. Input username & password
+== Proses Login ==
+
+User -> UI : Mengakses halaman login
 activate UI
-
-' Validasi awal di sisi client
-UI -> UI : 2. Validasi format input
-UI -> System : 3. Kirim Request Login (POST /auth/login)
+UI -> UI : Validasi format input
+User -> UI : Input email & password
+UI -> System : Kirim permintaan login\n(POST /auth/login)
 deactivate UI
 activate System
 
-' Cek ke Database
-System -> DB : 4. Cek User (SELECT by username)
+System -> DB : Cari pengguna berdasarkan email
 activate DB
-DB --> System : 5. Return Data User
+DB --> System : Kembalikan data pengguna
 deactivate DB
 
-alt User Ditemukan & Password Valid
-    System -> System : 6. Generate JWT Token
-    System -> DB : 7. Update last_login
+alt Pengguna Ditemukan & Password Valid
+    System -> System : Verifikasi kredensial\n(bcrypt)
+    System -> System : Generate JWT Token
+    System -> DB : Perbarui last_login
     activate DB
-    DB --> System : 8. Update Berhasil
+    DB --> System : Pembaruan berhasil
     deactivate DB
-    
-    System --> UI : 9. Return {success: true, token, user}
+
+    System --> UI : Kembalikan token & data user
     deactivate System
     activate UI
-    
-    ' Redirect ke Dashboard
-    UI -> Dash : 10. Redirect + Bearer Token
+
+    UI -> Dash : Redirect ke Dashboard\n+ Bearer Token
     deactivate UI
     activate Dash
-    
-    Dash --> User : 11. Tampilkan Dashboard
+
+    Dash --> User : Tampilkan Dashboard
     deactivate Dash
 
-else User Tidak Ditemukan
-    System --> UI : 12. Return {success: false, message: "User not found"}
+else Pengguna Tidak Ditemukan
+    System --> UI : Error: Email tidak terdaftar
     deactivate System
     activate UI
-    UI --> User : 13. Tampilkan "Email tidak terdaftar"
+    UI --> User : Tampilkan pesan error
     deactivate UI
 
 else Password Salah
-    System --> UI : 14. Return {success: false, message: "Invalid password"}
+    System --> UI : Error: Password salah
     deactivate System
     activate UI
-    UI --> User : 15. Tampilkan "Password salah"
+    UI --> User : Tampilkan pesan error
     deactivate UI
 
 else Akun Non-Aktif
-    System --> UI : 16. Return {success: false, message: "Account disabled"}
+    System --> UI : Error: Akun dinonaktifkan
     deactivate System
     activate UI
-    UI --> User : 17. Tampilkan "Akun dinonaktifkan"
+    UI --> User : Tampilkan pesan error
     deactivate UI
 end
 
 note right of User
-  * Semua komunikasi via HTTPS
-  * Password dikirim terenkripsi
-  * Token disimpan di localStorage/HttpOnly cookie
+  Berlaku untuk Admin, Teknisi,
+  dan Customer Portal.
+  Password diverifikasi dengan bcrypt.
+  Token JWT disimpan di localStorage.
 end note
 
 @enduml

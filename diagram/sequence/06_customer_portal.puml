@@ -1,0 +1,155 @@
+@startuml
+!theme mars
+autonumber
+skinparam sequenceMessageAlign center
+
+actor "Pelanggan" as Cust
+boundary "Customer Portal" as UI
+control "Sistem" as System
+database "DB Customers" as DB
+participant "Xendit" as PG
+
+== Lihat Status Langganan ==
+
+Cust -> UI : Login ke Customer Portal
+activate UI
+UI -> System : POST /api/customer-portal/auth
+deactivate UI
+activate System
+
+System -> System : Verifikasi token JWT
+
+System -> DB : Ambil data subscription\n& invoice pelanggan
+activate DB
+DB --> System : Data langganan
+deactivate DB
+
+System -> System : Hitung status:\nAktif / Jatuh Tempo / Terisolasi
+
+System --> UI : Data subscription & status
+deactivate System
+activate UI
+UI --> Cust : Tampilkan dashboard\nstatus langganan
+deactivate UI
+
+== Bayar Tagihan ==
+
+Cust -> UI : Pilih invoice belum dibayar
+activate UI
+UI -> System : GET /api/customer-portal/invoices/unpaid
+deactivate UI
+activate System
+
+System -> DB : Ambil invoice unpaid
+activate DB
+DB --> System : Daftar invoice
+deactivate DB
+
+System --> UI : Daftar tagihan
+deactivate System
+activate UI
+UI --> Cust : Tampilkan tagihan tertunggak
+deactivate UI
+
+Cust -> UI : Klik Bayar &\npilih metode pembayaran
+activate UI
+UI -> System : POST /api/customer-portal/invoices/:id/pay
+deactivate UI
+activate System
+
+System -> PG : Buat payment request
+activate PG
+PG --> System : payment_url
+deactivate PG
+
+System -> DB : UPDATE invoices\n(status = waiting_payment)
+activate DB
+DB --> System : Berhasil
+deactivate DB
+
+System --> UI : payment_url
+deactivate System
+activate UI
+UI --> Cust : Redirect ke halaman\npembayaran Xendit
+deactivate UI
+
+note over PG
+  Setelah pembayaran selesai,
+  Xendit mengirim callback webhook
+  (lihat diagram Billing)
+end note
+
+== Edit Profil Pelanggan ==
+
+Cust -> UI : Buka halaman Profil
+activate UI
+UI -> System : GET /api/customer-portal/profile
+deactivate UI
+activate System
+
+System -> DB : Ambil data profil
+activate DB
+DB --> System : Data profil
+deactivate DB
+
+System --> UI : Data profil
+deactivate System
+activate UI
+UI --> Cust : Tampilkan form profil
+deactivate UI
+
+Cust -> UI : Edit data & klik Simpan
+activate UI
+UI -> System : PUT /api/customer-portal/profile
+deactivate UI
+activate System
+
+System -> System : Validasi perubahan data
+alt Data Tidak Valid
+    System --> UI : Error: Data tidak valid
+    deactivate System
+    activate UI
+    UI --> Cust : Tampilkan pesan error
+    deactivate UI
+else Data Valid
+    System -> DB : UPDATE customers
+    activate DB
+    DB --> System : Berhasil
+    deactivate DB
+
+    System --> UI : 200 OK
+    deactivate System
+    activate UI
+    UI --> Cust : Profil berhasil diperbarui
+    deactivate UI
+end
+
+== Lihat Riwayat Pembayaran ==
+
+Cust -> UI : Buka menu\nRiwayat Pembayaran
+activate UI
+UI -> System : GET /api/customer-portal/payments
+deactivate UI
+activate System
+
+System -> DB : Query riwayat transaksi\nby customer_id
+activate DB
+DB --> System : Riwayat transaksi
+deactivate DB
+
+System -> System : Format data\n(tanggal, nominal, status)
+
+System --> UI : Data riwayat
+deactivate System
+activate UI
+UI --> Cust : Tampilkan daftar transaksi
+deactivate UI
+
+note right of Cust
+  Customer Portal: self-service.
+  Login JWT terpisah dari Admin.
+  Pembayaran via Xendit.
+  Akses data milik sendiri saja.
+end note
+
+@enduml

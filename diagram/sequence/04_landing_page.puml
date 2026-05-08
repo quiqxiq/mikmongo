@@ -1,0 +1,72 @@
+@startuml
+!theme mars
+autonumber
+skinparam sequenceMessageAlign center
+
+actor "Tamu" as Tamu
+boundary "Landing Page" as UI
+control "Sistem" as System
+database "DB Profiles" as DB
+
+== Akses Landing Page ==
+
+Tamu -> UI : Akses URL Landing Page
+activate UI
+UI -> System : GET /api/public/packages
+deactivate UI
+activate System
+
+System -> DB : Ambil data paket & harga
+activate DB
+DB --> System : Daftar paket aktif
+deactivate DB
+
+System --> UI : Data paket layanan
+deactivate System
+activate UI
+UI -> UI : Render halaman\n(Hero, Paket, Testimoni)
+UI --> Tamu : Tampilkan informasi\npaket & harga layanan
+deactivate UI
+
+== Registrasi dari Landing Page ==
+
+Tamu -> UI : Klik tombol Daftar\npada paket yang dipilih
+activate UI
+UI --> Tamu : Tampilkan form registrasi
+deactivate UI
+
+Tamu -> UI : Isi form\n(Nama, Alamat, No. WhatsApp)
+activate UI
+UI -> System : POST /api/public/register
+deactivate UI
+activate System
+
+System -> System : Validasi kelengkapan\n& format data
+alt Data Tidak Valid / Duplikat
+    System --> UI : Error validasi
+    deactivate System
+    activate UI
+    UI --> Tamu : Tampilkan error,\nminta isi ulang
+    deactivate UI
+else Data Valid
+    System -> DB : INSERT registrations\n(status = pending)
+    activate DB
+    DB --> System : registration_id
+    deactivate DB
+
+    System -> System : Kirim notifikasi WA ke Admin
+    System --> UI : Registrasi berhasil
+    deactivate System
+    activate UI
+    UI --> Tamu : Registrasi diterima,\nmenunggu review Admin
+    deactivate UI
+end
+
+note right of Tamu
+  Landing page menampilkan
+  paket internet yang tersedia.
+  Tamu dapat mendaftar langsung.
+  Status awal: pending.
+end note
+
+@enduml

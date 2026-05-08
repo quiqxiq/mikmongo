@@ -3,114 +3,89 @@
 autonumber
 skinparam sequenceMessageAlign center
 
-' Definisi Partisipan
 actor "Admin" as User
 boundary "Halaman Laporan" as UI
-control "Sistem (Backend)" as System
-database "Database (Reports)" as DB
-participant "MikroTik Router" as MT
+control "Sistem" as System
+database "DB Reports" as DB
 
-' ================= FLOW 1: LAPORAN CUSTOMER =================
-group Laporan Customer
-    User -> UI : 1. Pilih tipe laporan & filter tanggal
-    activate UI
-    UI -> System : 2. GET /api/reports/customer?type={}&start={}&end={}
-    deactivate UI
-    activate System
-    
-    System -> DB : 3. Query data (customers, subscriptions, invoices)
-    activate DB
-    DB --> System : 4. Return raw data
-    deactivate DB
-    
-    System -> System : 5. Aggregate & format (status aktif, total bayar, riwayat)
-    System -> DB : 6. Join dengan bandwidth_profile & router
-    activate DB
-    DB --> System : 7. Return joined data
-    deactivate DB
-    
-    System -> System : 8. Simpan hasil ke Cache (Redis)
-    System --> UI : 9. Return {success: true, data: [...], stats: {...}}
-    deactivate System
-    activate UI
-    UI --> User : 10. Tampilkan tabel & ringkasan statistik
-    deactivate UI
-end
+== Laporan Pelanggan ==
 
-' ================= FLOW 2: LAPORAN PENJUALAN HOTSPOT =================
-group Laporan Penjualan Hotspot
-    User -> UI : 11. Pilih periode & filter router/paket
-    activate UI
-    UI -> System : 12. GET /api/reports/hotspot?period={}&router_id={}
-    deactivate UI
-    activate System
-    
-    System -> DB : 13. Query (voucher_sales, hotspot_users, profiles)
-    activate DB
-    DB --> System : 14. Return data penjualan
-    deactivate DB
-    
-    System -> System : 15. Aggregate (total revenue, qty, profit) & Group by tanggal
-    System -> System : 16. Generate data untuk grafik (trend & top package)
-    System -> DB : 17. Simpan hasil cache
-    activate DB
-    DB --> System : 18. Cache saved
-    deactivate DB
-    
-    System --> UI : 19. Return {success: true, table: [...], chart: {...}}
-    deactivate System
-    activate UI
-    UI --> User : 20. Tampilkan dashboard penjualan & grafik interaktif
-    deactivate UI
-end
+User -> UI : Pilih tipe laporan\n& filter periode
+activate UI
+UI -> System : GET /api/reports/customers
+deactivate UI
+activate System
 
-' ================= FLOW 3: EXPORT & DOWNLOAD =================
-group Export & Download Laporan
-    User -> UI : 21. Klik Export (PDF/Excel)
-    activate UI
-    UI -> System : 22. POST /api/reports/export {type, format}
-    deactivate UI
-    activate System
-    
-    System -> DB : 23. Ambil dataset dari Cache/Database
-    activate DB
-    DB --> System : 24. Return data lengkap
-    deactivate DB
-    
-    System -> System : 25. Render template laporan (PDF/Excel engine)
-    System -> System : 26. Tambahkan metadata (tanggal, admin, watermark)
-    System -> DB : 27. Catat log export (audit trail)
-    activate DB
-    DB --> System : 28. Log tersimpan
-    deactivate DB
-    
-    System --> UI : 29. Return file binary / download URL
-    deactivate System
-    activate UI
-    UI --> User : 30. Download file ke perangkat
-    deactivate UI
-end
+System -> DB : Query data pelanggan,\nlangganan, & invoice
+activate DB
+DB --> System : Raw data
+deactivate DB
 
-' ================= FLOW 4: SINKRONISASI REALTIME (CRON) =================
-group Sinkronisasi Data Realtime
-    System -> System : 31. Trigger Cron Job (setiap 5 menit)
-    System -> MT : 32. API: Ambil statistik active session & traffic
-    activate MT
-    MT --> System : 33. Return data real-time
-    deactivate MT
-    
-    System -> DB : 34. Update summary laporan & status user
-    activate DB
-    DB --> System : 35. Update berhasil
-    deactivate DB
-    System -> System : 36. Refresh cache laporan
-end
+System -> System : Agregasi data\n(status aktif, total bayar)
+System -> DB : Join dengan\nbandwidth_profile & router
+activate DB
+DB --> System : Data tergabung
+deactivate DB
+
+System --> UI : Data & statistik
+deactivate System
+activate UI
+UI --> User : Tampilkan tabel\n& ringkasan statistik
+deactivate UI
+
+== Laporan Penjualan Hotspot ==
+
+User -> UI : Pilih periode &\nfilter router/paket
+activate UI
+UI -> System : GET /api/reports/hotspot
+deactivate UI
+activate System
+
+System -> DB : Query data penjualan\nvoucher & profil
+activate DB
+DB --> System : Data penjualan
+deactivate DB
+
+System -> System : Agregasi\n(pendapatan, kuantitas, profit)
+System -> System : Generate data grafik\n(tren & paket terlaris)
+
+System --> UI : Data tabel & grafik
+deactivate System
+activate UI
+UI --> User : Tampilkan dashboard\npenjualan & grafik
+deactivate UI
+
+== Export & Download Laporan ==
+
+User -> UI : Klik Export (PDF/Excel)
+activate UI
+UI -> System : POST /api/reports/export
+deactivate UI
+activate System
+
+System -> DB : Ambil dataset
+activate DB
+DB --> System : Data lengkap
+deactivate DB
+
+System -> System : Render template laporan\n(PDF/Excel)
+System -> System : Tambahkan metadata\n(tanggal, admin)
+System -> DB : Catat log export\n(audit trail)
+activate DB
+DB --> System : Log tersimpan
+deactivate DB
+
+System --> UI : File / download URL
+deactivate System
+activate UI
+UI --> User : Download file ke perangkat
+deactivate UI
 
 note right of User
-  * Laporan di-cache di Redis untuk akses cepat
-  * Export mendukung PDF & Excel dengan audit log
-  * Cron job memastikan data selalu up-to-date
-  * MikroTik menyumbang data realtime (session/traffic)
+  Laporan pelanggan: status & bayar.
+  Laporan penjualan: hotspot & tren.
+  Export: PDF & Excel.
+  Audit log setiap export.
 end note
 
 @enduml
