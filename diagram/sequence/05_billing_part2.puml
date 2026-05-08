@@ -1,0 +1,75 @@
+@startuml
+!theme mars
+autonumber
+skinparam sequenceMessageAlign center
+
+' Definisi Partisipan
+actor "Admin" as User
+boundary "Halaman Billing" as UI
+control "Sistem (Backend)" as System
+database "Database (invoices, subscriptions)" as DB
+participant "MikroTik Router" as MT
+participant "WA Gateway" as WA
+
+' ================= FLOW 4: ISOLASI (JATUH TEMPO) =================
+group Isolasi Customer Otomatis (Cron Job)
+    System -> System : Trigger harian (Cron Isolasi)
+
+    System -> DB : Cek invoice unpaid yang melewati due_date
+    activate DB
+    DB --> System : Kembalikan daftar overdue
+    deactivate DB
+
+    loop Untuk setiap pelanggan overdue
+        System -> MT : Nonaktifkan PPP Secret (disabled=yes)
+        activate MT
+        MT --> System : PPP Secret dinonaktifkan
+        deactivate MT
+
+        System -> DB : UPDATE subscription SET status='isolated'
+        activate DB
+        DB --> System : Pembaruan berhasil
+        deactivate DB
+
+        System -> WA : Kirim notifikasi isolasi ke pelanggan
+        activate WA
+        WA --> System : Terkirim
+        deactivate WA
+
+        System -> System : Catat log isolasi
+    end
+
+    System -> System : Proses isolasi selesai
+end
+
+' ================= FLOW 5: UN-ISOLASI (PEMBAYARAN LUNAS) =================
+group Un-Isolasi (Pemulihan Layanan)
+    User -> UI : Klik "Pulihkan Layanan" pada pelanggan terisolasi
+    activate UI
+    UI -> System : POST /api/subscriptions/:id/unisolate
+    deactivate UI
+    activate System
+
+    System -> DB : Cek status invoice terkait
+    activate DB
+    DB --> System : Konfirmasi status='paid'
+    deactivate DB
+
+    System -> MT : Aktifkan PPP Secret (disabled=no)
+    activate MT
+    MT --> System : PPP Secret diaktifkan kembali
+    deactivate MT
+
+    System -> DB : UPDATE subscription SET status='active'
+    activate DB
+    DB --> System : Pembaruan berhasil
+    deactivate DB
+
+    System --> UI : Kembalikan {success: true, message: "Layanan dipulihkan"}
+    deactivate System
+    activate UI
+    UI --> User : Tampilkan "Layanan pelanggan aktif kembali"
+    deactivate UI
+end
+
+@enduml

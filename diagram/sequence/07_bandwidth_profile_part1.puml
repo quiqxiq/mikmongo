@@ -1,0 +1,111 @@
+@startuml
+!theme mars
+autonumber
+skinparam sequenceMessageAlign center
+
+actor "Admin / Teknisi" as User
+boundary "Halaman\nBandwidth Profile" as UI
+control "Sistem" as System
+database "DB Profiles" as DB
+participant "MikroTik\nRouter" as MT
+
+== Tambah Bandwidth Profile & Sync ==
+
+User -> UI : Input data\n(Nama, Upload, Download, Harga)
+activate UI
+UI -> System : POST /api/bandwidth-profiles
+deactivate UI
+activate System
+
+System -> System : Validasi format data
+System -> DB : INSERT bandwidth_profiles
+activate DB
+DB --> System : profile_id
+deactivate DB
+
+System -> DB : Cek ketersediaan router target
+activate DB
+DB --> System : Data router
+deactivate DB
+
+System -> MT : Buat PPP Profile di router\n(name, rate-limit)
+activate MT
+
+alt Router Online & Berhasil Sync
+    MT --> System : Berhasil
+    deactivate MT
+
+    System -> DB : UPDATE status = synced
+    activate DB
+    DB --> System : Berhasil
+    deactivate DB
+
+    System --> UI : Tersimpan & tersinkronisasi
+    deactivate System
+    activate UI
+    UI --> User : Profil ditambahkan ke router
+    deactivate UI
+
+else Router Offline
+    MT --> System : Error: Timeout
+    deactivate MT
+
+    System -> DB : UPDATE status = pending_sync
+    activate DB
+    DB --> System : Berhasil
+    deactivate DB
+
+    System --> UI : Warning: Gagal sync ke router
+    deactivate System
+    activate UI
+    UI --> User : Data tersimpan, status pending
+    deactivate UI
+end
+
+== Ubah Bandwidth Profile & Sync ==
+
+User -> UI : Edit kecepatan & klik Simpan
+activate UI
+UI -> System : PUT /api/bandwidth-profiles/:id
+deactivate UI
+activate System
+
+System -> DB : UPDATE bandwidth_profiles
+activate DB
+DB --> System : Berhasil
+deactivate DB
+
+System -> MT : Update PPP Profile di router
+activate MT
+
+alt Router Online & Berhasil Sync
+    MT --> System : Berhasil
+    deactivate MT
+
+    System -> DB : UPDATE status = synced
+    activate DB
+    DB --> System : Berhasil
+    deactivate DB
+
+    System --> UI : Profil diperbarui
+    deactivate System
+    activate UI
+    UI --> User : Profil router & DB diperbarui
+    deactivate UI
+else Router Offline
+    MT --> System : Error: Timeout
+    deactivate MT
+
+    System -> DB : UPDATE status = pending_sync
+    activate DB
+    DB --> System : Berhasil
+    deactivate DB
+
+    System --> UI : Warning: DB diperbarui,\ngagal sync
+    deactivate System
+    activate UI
+    UI --> User : Tersimpan, sync tertunda
+    deactivate UI
+end
+
+@enduml

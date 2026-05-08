@@ -1,0 +1,77 @@
+@startuml
+!theme mars
+autonumber
+skinparam sequenceMessageAlign center
+
+actor "Pelanggan" as Cust
+boundary "Customer Portal" as UI
+control "Sistem" as System
+database "DB Customers" as DB
+
+== Edit Profil Pelanggan ==
+
+Cust -> UI : Buka halaman Profil
+activate UI
+UI -> System : GET /api/customer-portal/profile
+deactivate UI
+activate System
+
+System -> DB : Ambil data profil
+activate DB
+DB --> System : Data profil
+deactivate DB
+
+System --> UI : Data profil
+deactivate System
+activate UI
+UI --> Cust : Tampilkan form profil
+deactivate UI
+
+Cust -> UI : Edit data & klik Simpan
+activate UI
+UI -> System : PUT /api/customer-portal/profile
+deactivate UI
+activate System
+
+System -> System : Validasi perubahan data
+alt Data Tidak Valid
+    System --> UI : Error: Data tidak valid
+    deactivate System
+    activate UI
+    UI --> Cust : Tampilkan pesan error
+    deactivate UI
+else Data Valid
+    System -> DB : UPDATE customers
+    activate DB
+    DB --> System : Berhasil
+    deactivate DB
+
+    System --> UI : 200 OK
+    deactivate System
+    activate UI
+    UI --> Cust : Profil berhasil diperbarui
+    deactivate UI
+end
+
+== Lihat Riwayat Pembayaran ==
+
+Cust -> UI : Buka menu\nRiwayat Pembayaran
+activate UI
+UI -> System : GET /api/customer-portal/payments
+deactivate UI
+activate System
+
+System -> DB : Query riwayat transaksi\nby customer_id
+activate DB
+DB --> System : Riwayat transaksi
+deactivate DB
+
+System -> System : Format data\n(tanggal, nominal, status)
+
+System --> UI : Data riwayat
+deactivate System
+activate UI
+UI --> Cust : Tampilkan daftar transaksi
+deactivate UI
+
+@enduml

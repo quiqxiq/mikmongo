@@ -1,0 +1,93 @@
+@startuml
+!theme mars
+autonumber
+skinparam sequenceMessageAlign center
+
+actor "Tamu" as Tamu
+boundary "Halaman\nRegistrasi" as UI
+control "Sistem" as System
+database "DB Registrations" as DB
+participant "WA Gateway" as WA
+actor "Admin" as Admin
+
+== Review & Persetujuan Admin ==
+
+WA -> Admin : Notifikasi WA:\nAda registrasi baru
+
+Admin -> UI : Login & buka dashboard
+activate UI
+UI -> System : GET /api/registrations\n?status=pending
+deactivate UI
+activate System
+
+System -> DB : Ambil data pending
+activate DB
+DB --> System : Daftar registrasi
+deactivate DB
+
+System --> UI : Data registrasi
+deactivate System
+activate UI
+UI --> Admin : Tampilkan data review
+deactivate UI
+
+alt Admin Menyetujui
+    Admin -> UI : Klik Setujui &\ninput jadwal pemasangan
+    activate UI
+    UI -> System : PUT /api/registrations/:id/approve
+    deactivate UI
+    activate System
+
+    System -> DB : UPDATE status = approved
+    activate DB
+    DB --> System : Berhasil
+    deactivate DB
+
+    System -> WA : Kirim WA persetujuan\n+ jadwal pemasangan
+    activate WA
+    WA --> System : Terkirim
+    deactivate WA
+    WA --> Tamu : Terima WA persetujuan
+
+    System -> DB : INSERT audit log
+    activate DB
+    DB --> System : Log tersimpan
+    deactivate DB
+
+    System --> UI : Berhasil
+    deactivate System
+    activate UI
+    UI --> Admin : Registrasi disetujui
+    deactivate UI
+
+else Admin Menolak
+    Admin -> UI : Klik Tolak &\ninput alasan penolakan
+    activate UI
+    UI -> System : PUT /api/registrations/:id/reject
+    deactivate UI
+    activate System
+
+    System -> DB : UPDATE status = rejected
+    activate DB
+    DB --> System : Berhasil
+    deactivate DB
+
+    System -> WA : Kirim WA penolakan\n+ alasan
+    activate WA
+    WA --> System : Terkirim
+    deactivate WA
+    WA --> Tamu : Terima WA penolakan
+
+    System -> DB : INSERT audit log
+    activate DB
+    DB --> System : Log tersimpan
+    deactivate DB
+
+    System --> UI : Berhasil
+    deactivate System
+    activate UI
+    UI --> Admin : Registrasi ditolak
+    deactivate UI
+end
+
+@enduml

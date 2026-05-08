@@ -1,0 +1,90 @@
+@startuml
+!theme mars
+autonumber
+skinparam sequenceMessageAlign center
+
+actor "Admin / Teknisi" as User
+boundary "Halaman\nPelanggan" as UI
+control "Sistem" as System
+database "DB Customers" as DB
+participant "MikroTik\nRouter" as MT
+
+== Hapus Pelanggan ==
+
+User -> UI : Pilih pelanggan & klik Hapus
+activate UI
+UI -> System : DELETE /api/customers/:id
+deactivate UI
+activate System
+
+System -> DB : Cek langganan aktif
+activate DB
+DB --> System : Jumlah langganan aktif
+deactivate DB
+
+alt Masih Memiliki Langganan Aktif
+    System --> UI : Error: Masih ada\nlangganan aktif
+    deactivate System
+    activate UI
+    UI --> User : Nonaktifkan langganan dulu
+    deactivate UI
+else Tidak Ada Langganan Aktif
+    System -> MT : Hapus PPP Secret terkait
+    activate MT
+    MT --> System : Berhasil
+    deactivate MT
+
+    System -> DB : Soft delete customer
+    activate DB
+    DB --> System : Berhasil
+    deactivate DB
+
+    System --> UI : 200 OK
+    deactivate System
+    activate UI
+    UI --> User : Pelanggan berhasil dihapus
+    deactivate UI
+end
+
+== Aktivasi Layanan ==
+
+User -> UI : Pilih pelanggan &\nklik Aktifkan Layanan
+activate UI
+UI -> System : POST /api/customers/:id/activate
+deactivate UI
+activate System
+
+System -> DB : Ambil data pelanggan\n& profil bandwidth
+activate DB
+DB --> System : Data profil
+deactivate DB
+
+System -> System : Generate kredensial PPPoE
+System -> MT : Buat PPP Secret di router
+activate MT
+
+alt Koneksi Router Gagal
+    MT --> System : Error: timeout
+    deactivate MT
+    System --> UI : Warning: Router tidak\ndapat dihubungi
+    deactivate System
+    activate UI
+    UI --> User : Perlu sinkronisasi manual
+    deactivate UI
+else Router Berhasil
+    MT --> System : PPP Secret dibuat
+    deactivate MT
+
+    System -> DB : UPDATE status = active
+    activate DB
+    DB --> System : Berhasil
+    deactivate DB
+
+    System --> UI : Layanan aktif
+    deactivate System
+    activate UI
+    UI --> User : Kredensial PPPoE dikirim
+    deactivate UI
+end
+
+@enduml

@@ -1,0 +1,37 @@
+@startuml
+!theme mars
+autonumber
+skinparam sequenceMessageAlign center
+
+actor "Admin" as User
+boundary "Halaman Laporan" as UI
+control "Sistem" as System
+database "DB Reports" as DB
+
+== Export & Download Laporan ==
+
+User -> UI : Klik Export (PDF/Excel)
+activate UI
+UI -> System : POST /api/reports/export
+deactivate UI
+activate System
+
+System -> DB : Ambil dataset
+activate DB
+DB --> System : Data lengkap
+deactivate DB
+
+System -> System : Render template laporan\n(PDF/Excel)
+System -> System : Tambahkan metadata\n(tanggal, admin)
+System -> DB : Catat log export\n(audit trail)
+activate DB
+DB --> System : Log tersimpan
+deactivate DB
+
+System --> UI : File / download URL
+deactivate System
+activate UI
+UI --> User : Download file ke perangkat
+deactivate UI
+
+@enduml

@@ -1,0 +1,49 @@
+@startuml
+!theme mars
+autonumber
+skinparam sequenceMessageAlign center
+
+actor "Admin / Teknisi" as User
+boundary "Halaman\nBandwidth Profile" as UI
+control "Sistem" as System
+database "DB Profiles" as DB
+participant "MikroTik\nRouter" as MT
+
+== Hapus Bandwidth Profile ==
+
+User -> UI : Klik Hapus pada profil
+activate UI
+UI -> System : DELETE /api/bandwidth-profiles/:id
+deactivate UI
+activate System
+
+System -> DB : Cek penggunaan\ndi tabel subscriptions
+activate DB
+DB --> System : Jumlah penggunaan
+deactivate DB
+
+alt Masih Digunakan
+    System --> UI : Error: Profil sedang\ndigunakan pelanggan
+    deactivate System
+    activate UI
+    UI --> User : Pindahkan pelanggan\nke profil lain
+    deactivate UI
+else Aman untuk Dihapus
+    System -> MT : Hapus PPP Profile dari router
+    activate MT
+    MT --> System : Berhasil
+    deactivate MT
+
+    System -> DB : DELETE bandwidth_profiles
+    activate DB
+    DB --> System : Berhasil
+    deactivate DB
+
+    System --> UI : 200 OK
+    deactivate System
+    activate UI
+    UI --> User : Profil berhasil dihapus
+    deactivate UI
+end
+
+@enduml

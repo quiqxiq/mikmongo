@@ -1,0 +1,86 @@
+@startuml
+!theme mars
+autonumber
+skinparam sequenceMessageAlign center
+
+actor "Super Admin" as Admin
+boundary "Halaman\nManajemen User" as UI
+control "Sistem" as System
+participant "Casbin\nRBAC" as RBAC
+database "DB Users" as DB
+
+== Hapus Pengguna ==
+
+Admin -> UI : Pilih pengguna untuk dihapus
+activate UI
+UI -> System : DELETE /api/users/:id
+deactivate UI
+activate System
+
+System -> System : Cek apakah menghapus\nakun sendiri
+alt Menghapus Akun Sendiri
+    System --> UI : Error: Tidak bisa menghapus\nakun sendiri
+    deactivate System
+    activate UI
+    UI --> Admin : Tampilkan pesan error
+    deactivate UI
+else Bukan Akun Sendiri
+    System -> DB : Soft delete user
+    activate DB
+    DB --> System : Berhasil
+    deactivate DB
+
+    System -> RBAC : Cabut semua role & izin
+    activate RBAC
+    RBAC -> DB : DELETE casbin_rules
+    activate DB
+    DB --> RBAC : Berhasil
+    deactivate DB
+    RBAC --> System : Role dicabut
+    deactivate RBAC
+
+    System --> UI : 200 OK
+    deactivate System
+    activate UI
+    UI --> Admin : Pengguna berhasil dihapus
+    deactivate UI
+end
+
+== Validasi Hak Akses (RBAC) ==
+
+Admin -> UI : Akses menu tertentu
+activate UI
+UI -> System : Request + Bearer Token
+deactivate UI
+activate System
+
+System -> System : Decode token,\nambil user_id & role
+
+System -> RBAC : Enforce(user_id, resource, action)
+activate RBAC
+RBAC -> DB : Query policy
+activate DB
+DB --> RBAC : allow/deny
+deactivate DB
+RBAC --> System : Hasil (true/false)
+deactivate RBAC
+
+alt Akses Diizinkan
+    System -> DB : Query data yang diminta
+    activate DB
+    DB --> System : Kembalikan data
+    deactivate DB
+    System --> UI : 200 OK + data
+    deactivate System
+    activate UI
+    UI --> Admin : Tampilkan halaman
+    deactivate UI
+else Akses Ditolak
+    System --> UI : 403 Forbidden
+    deactivate System
+    activate UI
+    UI --> Admin : Tampilkan "Akses Ditolak"
+    deactivate UI
+end
+
+@enduml

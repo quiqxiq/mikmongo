@@ -1,0 +1,67 @@
+@startuml
+!theme mars
+autonumber
+skinparam sequenceMessageAlign center
+
+actor "Admin / Teknisi" as Admin
+boundary "Halaman Hotspot" as UI
+control "Sistem" as System
+database "DB Hotspot" as DB
+participant "MikroTik\nRouter" as MT
+
+== Generate Voucher Hotspot ==
+
+Admin -> UI : Input jumlah &\npilih Hotspot Profile
+activate UI
+UI -> System : POST /api/hotspot/generate
+deactivate UI
+activate System
+
+System -> DB : Ambil parameter profil\n(speed, validity, harga)
+activate DB
+DB --> System : Data profil
+deactivate DB
+
+System -> System : Generate username/password\n& hitung kedaluwarsa
+System -> DB : INSERT batch hotspot_users
+activate DB
+DB --> System : Generated IDs
+deactivate DB
+
+System -> DB : INSERT log penjualan
+activate DB
+DB --> System : Log tersimpan
+deactivate DB
+
+System -> MT : Buat Hotspot User\ndi router (batch)
+activate MT
+MT --> System : Jumlah sukses/gagal
+deactivate MT
+
+System --> UI : Daftar voucher
+deactivate System
+activate UI
+UI --> Admin : Tampilkan voucher siap cetak
+deactivate UI
+
+== Cetak Voucher ==
+
+Admin -> UI : Pilih voucher & klik Cetak
+activate UI
+UI -> System : GET /api/hotspot/vouchers/:id/print
+deactivate UI
+activate System
+
+System -> DB : Query detail voucher & profil
+activate DB
+DB --> System : Data terformat
+deactivate DB
+
+System -> System : Generate template cetak
+System --> UI : File stream / download URL
+deactivate System
+activate UI
+UI --> Admin : Download & cetak voucher
+deactivate UI
+
+@enduml

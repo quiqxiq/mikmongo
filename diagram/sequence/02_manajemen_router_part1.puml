@@ -1,0 +1,115 @@
+@startuml
+!theme mars
+autonumber
+skinparam sequenceMessageAlign center
+
+actor "Admin / Teknisi" as User
+boundary "Halaman Router" as UI
+control "Sistem" as System
+database "DB Routers" as DB
+participant "MikroTik\nRouter" as MT
+
+== Tambah Router Baru ==
+
+User -> UI : Input data router\n(Nama, IP, Port, User, Password)
+activate UI
+UI -> System : POST /api/routers
+deactivate UI
+activate System
+
+System -> System : Validasi kelengkapan data
+alt Data Tidak Lengkap
+    System --> UI : Error: Data tidak lengkap
+    deactivate System
+    activate UI
+    UI --> User : Tampilkan pesan error
+    deactivate UI
+else Data Lengkap
+    System -> System : Enkripsi kata sandi (AES)
+    System -> DB : INSERT routers\n(status = checking)
+    activate DB
+    DB --> System : Kembalikan router_id
+    deactivate DB
+
+    System -> MT : Uji koneksi awal\nke RouterOS API
+    activate MT
+
+    alt Koneksi Berhasil
+        MT --> System : Info RouterOS
+        deactivate MT
+        System -> DB : UPDATE status = online
+        activate DB
+        DB --> System : Berhasil
+        deactivate DB
+        System --> UI : Router ditambahkan\ndan terhubung
+        deactivate System
+        activate UI
+        UI --> User : Tampilkan pesan sukses
+        deactivate UI
+    else Koneksi Gagal / Timeout
+        MT --> System : Error: unreachable
+        deactivate MT
+        System -> DB : UPDATE status = offline
+        activate DB
+        DB --> System : Berhasil
+        deactivate DB
+        System --> UI : Warning: Disimpan,\nkoneksi gagal
+        deactivate System
+        activate UI
+        UI --> User : Peringatan: Cek jaringan
+        deactivate UI
+    end
+end
+
+== Uji Koneksi Router ==
+
+User -> UI : Pilih router & klik Tes Koneksi
+activate UI
+UI -> System : POST /api/routers/:id/test
+deactivate UI
+activate System
+
+System -> DB : Ambil data router by ID
+activate DB
+DB --> System : IP, port, user, password_enc
+deactivate DB
+
+alt Router Tidak Ditemukan
+    System --> UI : Error: Router tidak ditemukan
+    deactivate System
+    activate UI
+    UI --> User : Tampilkan error
+    deactivate UI
+else Router Ditemukan
+    System -> System : Dekripsi kata sandi (AES)
+    System -> MT : Buka koneksi ke RouterOS API
+    activate MT
+
+    alt Koneksi Berhasil
+        MT --> System : Hasil koneksi (latency)
+        deactivate MT
+        System -> DB : Perbarui status & last_seen_at
+        activate DB
+        DB --> System : Berhasil
+        deactivate DB
+        System --> UI : Router online
+        deactivate System
+        activate UI
+        UI --> User : Tampilkan status online
+        deactivate UI
+    else Koneksi Gagal / Timeout
+        MT --> System : Error: ditolak/timeout
+        deactivate MT
+        System -> DB : UPDATE status = offline
+        activate DB
+        DB --> System : Berhasil
+        deactivate DB
+        System --> UI : Koneksi gagal
+        deactivate System
+        activate UI
+        UI --> User : Tampilkan status offline
+        deactivate UI
+    end
+end
+
+@enduml

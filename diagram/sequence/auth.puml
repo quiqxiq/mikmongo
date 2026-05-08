@@ -65,11 +65,4 @@ else Akun Non-Aktif
     deactivate UI
 end
 
-note right of User
-  Berlaku untuk Admin, Teknisi,
-  dan Customer Portal.
-  Password diverifikasi dengan bcrypt.
-  Token JWT disimpan di localStorage.
-end note
-
 @enduml

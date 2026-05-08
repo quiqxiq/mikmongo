@@ -1,0 +1,109 @@
+@startuml
+!theme mars
+autonumber
+skinparam sequenceMessageAlign center
+
+' Definisi Partisipan
+actor "Admin" as User
+boundary "Halaman Billing" as UI
+control "Sistem (Backend)" as System
+database "Database (invoices, subscriptions)" as DB
+participant "MikroTik Router" as MT
+participant "Xendit (Payment Gateway)" as PG
+participant "WA Gateway" as WA
+
+' ================= FLOW 1: GENERATE TAGIHAN (CRON) =================
+group Generate Tagihan Bulanan (Cron Job)
+    System -> System : Trigger harian (Cron Scheduler)
+
+    System -> DB : Cek langganan yang jatuh tempo hari ini
+    activate DB
+    DB --> System : Kembalikan daftar subscription
+    deactivate DB
+
+    loop Untuk setiap langganan jatuh tempo
+        System -> System : Hitung nominal tagihan
+        System -> DB : INSERT invoices (status='unpaid')
+        activate DB
+        DB --> System : Kembalikan invoice_id
+        deactivate DB
+
+        System -> WA : Kirim notifikasi tagihan ke pelanggan
+        activate WA
+        WA --> System : Notifikasi terkirim
+        deactivate WA
+    end
+
+    System -> System : Proses generate selesai
+end
+
+' ================= FLOW 2: PEMBAYARAN VIA PAYMENT GATEWAY =================
+group Pembayaran Layanan (via Xendit)
+    User -> UI : Pilih invoice & klik "Buat Link Pembayaran"
+    activate UI
+    UI -> System : POST /api/invoices/:id/pay
+    deactivate UI
+    activate System
+
+    System -> DB : Ambil detail invoice
+    activate DB
+    DB --> System : Kembalikan data invoice
+    deactivate DB
+
+    System -> PG : Buat payment request (amount, invoice_id)
+    activate PG
+    PG --> System : Kembalikan payment_url
+    deactivate PG
+
+    System -> DB : UPDATE invoices (payment_url, status='waiting_payment')
+    activate DB
+    DB --> System : Pembaruan berhasil
+    deactivate DB
+
+    System --> UI : Kembalikan {success: true, payment_url}
+    deactivate System
+    activate UI
+    UI --> User : Tampilkan link pembayaran
+    deactivate UI
+end
+
+' ================= FLOW 3: CALLBACK PEMBAYARAN =================
+group Callback Pembayaran (Webhook Xendit)
+    PG -> System : POST /api/webhooks/xendit {status, invoice_id}
+    activate System
+
+    System -> System : Verifikasi signature webhook
+
+    alt Pembayaran Berhasil
+        System -> DB : UPDATE invoices SET status='paid', paid_at=NOW()
+        activate DB
+        DB --> System : Pembaruan berhasil
+        deactivate DB
+
+        System -> MT : Aktifkan PPP Secret (disabled=no)
+        activate MT
+        MT --> System : Berhasil
+        deactivate MT
+
+        System -> DB : UPDATE subscription status='active'
+        activate DB
+        DB --> System : Pembaruan berhasil
+        deactivate DB
+
+        System -> WA : Kirim konfirmasi pembayaran ke pelanggan
+        activate WA
+        WA --> System : Terkirim
+        deactivate WA
+
+    else Pembayaran Gagal / Kadaluarsa
+        System -> DB : UPDATE invoices SET status='failed'
+        activate DB
+        DB --> System : Pembaruan berhasil
+        deactivate DB
+    end
+
+    System --> PG : Kembalikan 200 OK (acknowledge)
+    deactivate System
+end
+
+@enduml

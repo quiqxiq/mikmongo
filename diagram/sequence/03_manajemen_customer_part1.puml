@@ -1,0 +1,109 @@
+@startuml
+!theme mars
+autonumber
+skinparam sequenceMessageAlign center
+
+actor "Admin / Teknisi" as User
+boundary "Halaman\nPelanggan" as UI
+control "Sistem" as System
+database "DB Customers" as DB
+participant "MikroTik\nRouter" as MT
+
+== Lihat Daftar Pelanggan ==
+
+User -> UI : Buka menu Pelanggan
+activate UI
+UI -> System : GET /api/customers
+deactivate UI
+activate System
+
+System -> DB : Ambil daftar pelanggan
+activate DB
+DB --> System : Daftar pelanggan
+deactivate DB
+
+System --> UI : 200 OK + data
+deactivate System
+activate UI
+UI --> User : Tampilkan tabel pelanggan
+deactivate UI
+
+== Tambah Pelanggan Baru ==
+
+User -> UI : Klik Tambah & input data\n(Nama, No. HP, Alamat)
+activate UI
+UI -> System : POST /api/customers
+deactivate UI
+activate System
+
+System -> System : Validasi kelengkapan data
+System -> DB : Cek duplikasi (email/no HP)
+activate DB
+DB --> System : Status unik/duplikat
+deactivate DB
+
+alt Data Sudah Terdaftar
+    System --> UI : Error: Data sudah terdaftar
+    deactivate System
+    activate UI
+    UI --> User : Tampilkan pesan error
+    deactivate UI
+else Data Unik & Valid
+    System -> DB : INSERT customers
+    activate DB
+    DB --> System : Kembalikan customer_id
+    deactivate DB
+
+    System --> UI : 201 Created
+    deactivate System
+    activate UI
+    UI --> User : Pelanggan berhasil ditambahkan
+    deactivate UI
+end
+
+== Ubah Data Pelanggan ==
+
+User -> UI : Pilih pelanggan & klik Edit
+activate UI
+UI -> System : GET /api/customers/:id
+deactivate UI
+activate System
+
+System -> DB : Ambil data pelanggan by ID
+activate DB
+DB --> System : Data pelanggan
+deactivate DB
+
+System --> UI : Data pelanggan
+deactivate System
+activate UI
+UI --> User : Tampilkan form edit
+deactivate UI
+
+User -> UI : Ubah data & klik Simpan
+activate UI
+UI -> System : PUT /api/customers/:id
+deactivate UI
+activate System
+
+System -> System : Validasi data baru
+alt Data Tidak Valid
+    System --> UI : Error: Data tidak valid
+    deactivate System
+    activate UI
+    UI --> User : Tampilkan pesan error
+    deactivate UI
+else Data Valid
+    System -> DB : UPDATE customers
+    activate DB
+    DB --> System : Berhasil
+    deactivate DB
+
+    System --> UI : 200 OK
+    deactivate System
+    activate UI
+    UI --> User : Data pelanggan diperbarui
+    deactivate UI
+end
+
+@enduml

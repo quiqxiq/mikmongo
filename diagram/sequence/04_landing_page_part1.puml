@@ -1,0 +1,31 @@
+@startuml
+!theme mars
+autonumber
+skinparam sequenceMessageAlign center
+
+actor "Tamu" as Tamu
+boundary "Landing Page" as UI
+control "Sistem" as System
+database "DB Profiles" as DB
+
+== Akses Landing Page ==
+
+Tamu -> UI : Akses URL Landing Page
+activate UI
+UI -> System : GET /api/public/packages
+deactivate UI
+activate System
+
+System -> DB : Ambil data paket & harga
+activate DB
+DB --> System : Daftar paket aktif
+deactivate DB
+
+System --> UI : Data paket layanan
+deactivate System
+activate UI
+UI -> UI : Render halaman\n(Hero, Paket, Testimoni)
+UI --> Tamu : Tampilkan informasi\npaket & harga layanan
+deactivate UI
+
+@enduml

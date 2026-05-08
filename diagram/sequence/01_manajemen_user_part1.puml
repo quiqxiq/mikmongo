@@ -1,0 +1,128 @@
+@startuml
+!theme mars
+autonumber
+skinparam sequenceMessageAlign center
+
+actor "Super Admin" as Admin
+boundary "Halaman\nManajemen User" as UI
+control "Sistem" as System
+participant "Casbin\nRBAC" as RBAC
+database "DB Users" as DB
+
+== Lihat Daftar Pengguna ==
+
+Admin -> UI : Buka menu Manajemen User
+activate UI
+UI -> System : GET /api/users
+deactivate UI
+activate System
+
+System -> DB : Ambil daftar pengguna
+activate DB
+DB --> System : Kembalikan daftar pengguna
+deactivate DB
+
+System --> UI : 200 OK + data pengguna
+deactivate System
+activate UI
+UI --> Admin : Tampilkan tabel daftar pengguna
+deactivate UI
+
+== Tambah Pengguna Baru & Assign Role ==
+
+Admin -> UI : Input data\n(Nama, Email, Password, Role)
+activate UI
+UI -> System : POST /api/users
+deactivate UI
+activate System
+
+System -> System : Validasi format input
+System -> DB : Cek duplikasi email
+activate DB
+DB --> System : Status unik/duplikat
+deactivate DB
+
+alt Email Sudah Terdaftar
+    System --> UI : Error: Email sudah terdaftar
+    deactivate System
+    activate UI
+    UI --> Admin : Tampilkan pesan error
+    deactivate UI
+else Email Unik
+    System -> System : Hash password (bcrypt)
+    System -> DB : INSERT users
+    activate DB
+    DB --> System : Kembalikan user_id
+    deactivate DB
+
+    System -> RBAC : Assign Role ke User
+    activate RBAC
+    RBAC -> DB : INSERT casbin_rules
+    activate DB
+    DB --> RBAC : Berhasil
+    deactivate DB
+    RBAC --> System : Role di-assign
+    deactivate RBAC
+
+    System --> UI : 201 Created
+    deactivate System
+    activate UI
+    UI --> Admin : Pengguna berhasil ditambahkan
+    deactivate UI
+end
+
+== Ubah Data Pengguna ==
+
+Admin -> UI : Pilih pengguna yang akan diubah
+activate UI
+UI -> System : GET /api/users/:id
+deactivate UI
+activate System
+
+System -> DB : Ambil data pengguna by ID
+activate DB
+DB --> System : Kembalikan data pengguna
+deactivate DB
+
+System --> UI : Data pengguna
+deactivate System
+activate UI
+UI --> Admin : Tampilkan form edit
+deactivate UI
+
+Admin -> UI : Edit data & role, klik Simpan
+activate UI
+UI -> System : PUT /api/users/:id
+deactivate UI
+activate System
+
+System -> System : Validasi data baru
+alt Data Tidak Valid
+    System --> UI : Error: Data tidak valid
+    deactivate System
+    activate UI
+    UI --> Admin : Tampilkan pesan error
+    deactivate UI
+else Data Valid
+    System -> DB : UPDATE users
+    activate DB
+    DB --> System : Pembaruan berhasil
+    deactivate DB
+
+    System -> RBAC : Perbarui role jika berubah
+    activate RBAC
+    RBAC -> DB : UPDATE casbin_rules
+    activate DB
+    DB --> RBAC : Berhasil
+    deactivate DB
+    RBAC --> System : Role diperbarui
+    deactivate RBAC
+
+    System --> UI : 200 OK
+    deactivate System
+    activate UI
+    UI --> Admin : Data pengguna diperbarui
+    deactivate UI
+end
+
+@enduml

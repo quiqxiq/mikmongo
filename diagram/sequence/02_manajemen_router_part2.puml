@@ -1,0 +1,82 @@
+@startuml
+!theme mars
+autonumber
+skinparam sequenceMessageAlign center
+
+actor "Admin / Teknisi" as User
+boundary "Halaman Router" as UI
+control "Sistem" as System
+database "DB Routers" as DB
+participant "MikroTik\nRouter" as MT
+
+== Ubah Konfigurasi Router ==
+
+User -> UI : Edit data router & klik Simpan
+activate UI
+UI -> System : PUT /api/routers/:id
+deactivate UI
+activate System
+
+System -> DB : Ambil data router saat ini
+activate DB
+DB --> System : Data existing
+deactivate DB
+
+System -> System : Bandingkan perubahan & validasi
+alt Ada Perubahan Kredensial/IP
+    System -> System : Enkripsi password baru (AES)
+    System -> MT : Verifikasi koneksi\ndengan kredensial baru
+    activate MT
+    MT --> System : Hasil verifikasi
+    deactivate MT
+    alt Verifikasi Gagal
+        System --> UI : Error: Koneksi gagal\ndengan data baru
+        deactivate System
+        activate UI
+        UI --> User : Update dibatalkan
+        deactivate UI
+    end
+end
+
+System -> DB : UPDATE routers
+activate DB
+DB --> System : Berhasil
+deactivate DB
+System --> UI : 200 OK
+deactivate System
+activate UI
+UI --> User : Konfigurasi router diperbarui
+deactivate UI
+
+== Hapus Router ==
+
+User -> UI : Pilih router & klik Hapus
+activate UI
+UI -> System : DELETE /api/routers/:id
+deactivate UI
+activate System
+
+System -> DB : Cek dependensi\n(subscriptions/customers)
+activate DB
+DB --> System : Jumlah penggunaan
+deactivate DB
+
+alt Masih Digunakan
+    System --> UI : Error: Router masih\ndigunakan pelanggan
+    deactivate System
+    activate UI
+    UI --> User : Nonaktifkan pelanggan dulu
+    deactivate UI
+else Tidak Digunakan
+    System -> DB : DELETE router
+    activate DB
+    DB --> System : Berhasil
+    deactivate DB
+    System --> UI : 200 OK
+    deactivate System
+    activate UI
+    UI --> User : Router berhasil dihapus
+    deactivate UI
+end
+
+@enduml

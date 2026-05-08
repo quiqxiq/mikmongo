@@ -1,0 +1,42 @@
+@startuml
+!theme mars
+autonumber
+skinparam sequenceMessageAlign center
+
+actor "Admin / Teknisi" as Admin
+boundary "Halaman Hotspot" as UI
+control "Sistem" as System
+database "DB Hotspot" as DB
+participant "MikroTik\nRouter" as MT
+
+== Monitoring Session Aktif ==
+
+Admin -> UI : Buka Dashboard Hotspot
+activate UI
+UI -> System : GET /api/hotspot/active-sessions
+deactivate UI
+activate System
+
+System -> MT : Ambil daftar\nhotspot user aktif
+activate MT
+MT --> System : Daftar user aktif\n(IP, MAC, Uptime)
+deactivate MT
+
+System -> System : Cocokkan session\ndengan data di database
+System -> DB : UPDATE status = online,\nlast_seen = NOW()
+activate DB
+DB --> System : Berhasil
+deactivate DB
+
+System -> DB : UPDATE rekap laporan
+activate DB
+DB --> System : Berhasil
+deactivate DB
+
+System --> UI : Data user aktif & statistik
+deactivate System
+activate UI
+UI --> Admin : Tampilkan user online\n& statistik real-time
+deactivate UI
+
+@enduml
