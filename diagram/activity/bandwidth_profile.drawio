@@ -1,91 +1,317 @@
 <mxfile host="65bd71144e">
     <diagram id="xWwAVUFN0sXpAhNt7Zw0" name="Page-1">
-        <mxGraphModel dx="3225" dy="2569" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+        <mxGraphModel dx="4913" dy="4007" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
-                <mxCell id="lc" value="Create" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1"><mxGeometry x="60" y="-302" width="60" height="30" as="geometry"/></mxCell>
-                <mxCell id="cu" value="Admin / Teknisi" style="swimlane;whiteSpace=wrap;html=1;startSize=40;fillColor=#f5f5f5;fontColor=#333333;strokeColor=#666666;" vertex="1" parent="1"><mxGeometry x="30" y="-260" width="300" height="700" as="geometry"/></mxCell>
-                <mxCell id="cu1" value="" style="ellipse;aspect=fixed;fillColor=#000000;strokeColor=#000000;" vertex="1" parent="cu"><mxGeometry x="136" y="60" width="28" height="28" as="geometry"/></mxCell>
-                <mxCell id="cu2" value="Input Data Profil Bandwidth&#xa;(Nama, Upload, Download, Harga)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;arcSize=30;" vertex="1" parent="cu"><mxGeometry x="75" y="120" width="150" height="60" as="geometry"/></mxCell>
-                <mxCell id="cu3" value="Error: Data tidak valid" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;arcSize=30;" vertex="1" parent="cu"><mxGeometry x="80" y="280" width="140" height="40" as="geometry"/></mxCell>
-                <mxCell id="cu4" value="Error: Router tidak ditemukan" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;arcSize=30;" vertex="1" parent="cu"><mxGeometry x="80" y="350" width="140" height="40" as="geometry"/></mxCell>
-                <mxCell id="cu5" value="Warning: Tersimpan di DB,&#xa;gagal sync ke router" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;arcSize=30;" vertex="1" parent="cu"><mxGeometry x="80" y="480" width="140" height="50" as="geometry"/></mxCell>
-                <mxCell id="cu6" value="Berhasil: Profil bandwidth&#xa;dibuat dan tersinkronisasi" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;arcSize=30;" vertex="1" parent="cu"><mxGeometry x="80" y="590" width="140" height="60" as="geometry"/></mxCell>
-                <mxCell id="cu7" value="" style="shape=doubleEllipse;aspect=fixed;fillColor=#000000;strokeColor=#000000;" vertex="1" parent="cu"><mxGeometry x="136" y="660" width="28" height="28" as="geometry"/></mxCell>
-                <mxCell id="ecu1" style="edgeStyle=none;html=1;" edge="1" parent="cu" source="cu1" target="cu2"><mxGeometry relative="1" as="geometry"/></mxCell>
-                <mxCell id="ecu2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="cu" source="cu6" target="cu7"><mxGeometry relative="1" as="geometry"/></mxCell>
-                <mxCell id="cs" value="Sistem" style="swimlane;whiteSpace=wrap;html=1;startSize=40;fillColor=#f5f5f5;fontColor=#333333;strokeColor=#666666;" vertex="1" parent="1"><mxGeometry x="330" y="-260" width="300" height="700" as="geometry"/></mxCell>
-                <mxCell id="cs1" value="Validasi Input Data Profil" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;arcSize=30;" vertex="1" parent="cs"><mxGeometry x="65" y="120" width="170" height="50" as="geometry"/></mxCell>
-                <mxCell id="cs2" value="Data Valid?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="cs"><mxGeometry x="90" y="200" width="120" height="70" as="geometry"/></mxCell>
-                <mxCell id="cs3" value="Cek Ketersediaan&#xa;Router Target" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;arcSize=30;" vertex="1" parent="cs"><mxGeometry x="65" y="300" width="170" height="50" as="geometry"/></mxCell>
-                <mxCell id="cs4" value="Router Tersedia?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="cs"><mxGeometry x="90" y="380" width="120" height="70" as="geometry"/></mxCell>
-                <mxCell id="cs5" value="Simpan Profil ke DB &amp;&#xa;Sync ke MikroTik" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;arcSize=30;" vertex="1" parent="cs"><mxGeometry x="65" y="480" width="170" height="50" as="geometry"/></mxCell>
-                <mxCell id="cs6" value="Sync Berhasil?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="cs"><mxGeometry x="90" y="560" width="120" height="70" as="geometry"/></mxCell>
-                <mxCell id="ecs1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="cs" source="cs1" target="cs2"><mxGeometry relative="1" as="geometry"/></mxCell>
-                <mxCell id="ecs2" value="Ya" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#82b366;fontColor=#82b366;fontStyle=1;" edge="1" parent="cs" source="cs2" target="cs3"><mxGeometry relative="1" as="geometry"/></mxCell>
-                <mxCell id="ecs3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="cs" source="cs3" target="cs4"><mxGeometry relative="1" as="geometry"/></mxCell>
-                <mxCell id="ecs4" value="Ya" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#82b366;fontColor=#82b366;fontStyle=1;" edge="1" parent="cs" source="cs4" target="cs5"><mxGeometry relative="1" as="geometry"/></mxCell>
-                <mxCell id="ecs5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="cs" source="cs5" target="cs6"><mxGeometry relative="1" as="geometry"/></mxCell>
-                <mxCell id="xc1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="cu2" target="cs1"><mxGeometry relative="1" as="geometry"/></mxCell>
-                <mxCell id="xc2" value="Tidak" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#b85450;fontColor=#b85450;fontStyle=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="cs2" target="cu3"><mxGeometry relative="1" as="geometry"/></mxCell>
-                <mxCell id="xc3" value="Tidak" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#b85450;fontColor=#b85450;fontStyle=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="cs4" target="cu4"><mxGeometry relative="1" as="geometry"/></mxCell>
-                <mxCell id="xc4" value="Tidak" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#b85450;fontColor=#b85450;fontStyle=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="cs6" target="cu5"><mxGeometry relative="1" as="geometry"/></mxCell>
-                <mxCell id="xc5" value="Ya" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#82b366;fontColor=#82b366;fontStyle=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="cs6" target="cu6"><mxGeometry relative="1" as="geometry"/></mxCell>
-
-                <!-- UPDATE -->
-                <mxCell id="lu" value="Update" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1"><mxGeometry x="700" y="-302" width="60" height="30" as="geometry"/></mxCell>
-                <mxCell id="uu" value="Admin / Teknisi" style="swimlane;whiteSpace=wrap;html=1;startSize=40;fillColor=#f5f5f5;fontColor=#333333;strokeColor=#666666;" vertex="1" parent="1"><mxGeometry x="660" y="-260" width="300" height="700" as="geometry"/></mxCell>
-                <mxCell id="uu1" value="" style="ellipse;aspect=fixed;fillColor=#000000;strokeColor=#000000;" vertex="1" parent="uu"><mxGeometry x="136" y="60" width="28" height="28" as="geometry"/></mxCell>
-                <mxCell id="uu2" value="Pilih Profil Bandwidth&#xa;yang Akan Diupdate" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;arcSize=30;" vertex="1" parent="uu"><mxGeometry x="80" y="120" width="140" height="60" as="geometry"/></mxCell>
-                <mxCell id="uu3" value="Edit Parameter Bandwidth" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;arcSize=30;" vertex="1" parent="uu"><mxGeometry x="80" y="280" width="140" height="50" as="geometry"/></mxCell>
-                <mxCell id="uu4" value="Error: Data tidak valid" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;arcSize=30;" vertex="1" parent="uu"><mxGeometry x="80" y="370" width="140" height="40" as="geometry"/></mxCell>
-                <mxCell id="uu5" value="Warning: DB updated,&#xa;router gagal" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;arcSize=30;" vertex="1" parent="uu"><mxGeometry x="80" y="490" width="140" height="50" as="geometry"/></mxCell>
-                <mxCell id="uu6" value="Berhasil: Profil bandwidth&#xa;diupdate" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;arcSize=30;" vertex="1" parent="uu"><mxGeometry x="80" y="590" width="140" height="60" as="geometry"/></mxCell>
-                <mxCell id="uu7" value="" style="shape=doubleEllipse;aspect=fixed;fillColor=#000000;strokeColor=#000000;" vertex="1" parent="uu"><mxGeometry x="136" y="660" width="28" height="28" as="geometry"/></mxCell>
-                <mxCell id="euu1" style="edgeStyle=none;html=1;" edge="1" parent="uu" source="uu1" target="uu2"><mxGeometry relative="1" as="geometry"/></mxCell>
-                <mxCell id="euu2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="uu" source="uu6" target="uu7"><mxGeometry relative="1" as="geometry"/></mxCell>
-                <mxCell id="us" value="Sistem" style="swimlane;whiteSpace=wrap;html=1;startSize=40;fillColor=#f5f5f5;fontColor=#333333;strokeColor=#666666;" vertex="1" parent="1"><mxGeometry x="960" y="-260" width="300" height="700" as="geometry"/></mxCell>
-                <mxCell id="us1" value="Ambil Data Profil dari DB" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;arcSize=30;" vertex="1" parent="us"><mxGeometry x="65" y="120" width="170" height="50" as="geometry"/></mxCell>
-                <mxCell id="us2" value="Validasi Perubahan Data" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;arcSize=30;" vertex="1" parent="us"><mxGeometry x="65" y="280" width="170" height="50" as="geometry"/></mxCell>
-                <mxCell id="us3" value="Perubahan Valid?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="us"><mxGeometry x="90" y="360" width="120" height="70" as="geometry"/></mxCell>
-                <mxCell id="us4" value="Update DB &amp; Sync&#xa;PPP Profile ke MikroTik" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;arcSize=30;" vertex="1" parent="us"><mxGeometry x="65" y="460" width="170" height="50" as="geometry"/></mxCell>
-                <mxCell id="us5" value="Update Berhasil?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="us"><mxGeometry x="90" y="540" width="120" height="70" as="geometry"/></mxCell>
-                <mxCell id="eus1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="us" source="us2" target="us3"><mxGeometry relative="1" as="geometry"/></mxCell>
-                <mxCell id="eus2" value="Ya" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#82b366;fontColor=#82b366;fontStyle=1;" edge="1" parent="us" source="us3" target="us4"><mxGeometry relative="1" as="geometry"/></mxCell>
-                <mxCell id="eus3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="us" source="us4" target="us5"><mxGeometry relative="1" as="geometry"/></mxCell>
-                <mxCell id="xu1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="uu2" target="us1"><mxGeometry relative="1" as="geometry"/></mxCell>
-                <mxCell id="xu2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="us1" target="uu3"><mxGeometry relative="1" as="geometry"/></mxCell>
-                <mxCell id="xu3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="uu3" target="us2"><mxGeometry relative="1" as="geometry"/></mxCell>
-                <mxCell id="xu4" value="Tidak" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#b85450;fontColor=#b85450;fontStyle=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="us3" target="uu4"><mxGeometry relative="1" as="geometry"/></mxCell>
-                <mxCell id="xu5" value="Tidak" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#b85450;fontColor=#b85450;fontStyle=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="us5" target="uu5"><mxGeometry relative="1" as="geometry"/></mxCell>
-                <mxCell id="xu6" value="Ya" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#82b366;fontColor=#82b366;fontStyle=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="us5" target="uu6"><mxGeometry relative="1" as="geometry"/></mxCell>
-
-                <!-- DELETE -->
-                <mxCell id="ld" value="Delete" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1"><mxGeometry x="60" y="490" width="60" height="30" as="geometry"/></mxCell>
-                <mxCell id="du" value="Admin / Teknisi" style="swimlane;whiteSpace=wrap;html=1;startSize=40;fillColor=#f5f5f5;fontColor=#333333;strokeColor=#666666;" vertex="1" parent="1"><mxGeometry x="30" y="530" width="300" height="650" as="geometry"/></mxCell>
-                <mxCell id="du1" value="" style="ellipse;aspect=fixed;fillColor=#000000;strokeColor=#000000;" vertex="1" parent="du"><mxGeometry x="136" y="60" width="28" height="28" as="geometry"/></mxCell>
-                <mxCell id="du2" value="Pilih Profil Bandwidth&#xa;untuk Dihapus" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;arcSize=30;" vertex="1" parent="du"><mxGeometry x="80" y="120" width="140" height="60" as="geometry"/></mxCell>
-                <mxCell id="du3" value="Gagal: Profil masih aktif&#xa;digunakan pelanggan" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;arcSize=30;" vertex="1" parent="du"><mxGeometry x="80" y="280" width="140" height="50" as="geometry"/></mxCell>
-                <mxCell id="du4" value="Warning: Terhapus di DB,&#xa;gagal di router" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;arcSize=30;" vertex="1" parent="du"><mxGeometry x="80" y="430" width="140" height="50" as="geometry"/></mxCell>
-                <mxCell id="du5" value="Berhasil: Profil bandwidth&#xa;dihapus permanen" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;arcSize=30;" vertex="1" parent="du"><mxGeometry x="80" y="540" width="140" height="60" as="geometry"/></mxCell>
-                <mxCell id="du6" value="" style="shape=doubleEllipse;aspect=fixed;fillColor=#000000;strokeColor=#000000;" vertex="1" parent="du"><mxGeometry x="136" y="610" width="28" height="28" as="geometry"/></mxCell>
-                <mxCell id="edu1" style="edgeStyle=none;html=1;" edge="1" parent="du" source="du1" target="du2"><mxGeometry relative="1" as="geometry"/></mxCell>
-                <mxCell id="edu2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="du" source="du5" target="du6"><mxGeometry relative="1" as="geometry"/></mxCell>
-                <mxCell id="ds" value="Sistem" style="swimlane;whiteSpace=wrap;html=1;startSize=40;fillColor=#f5f5f5;fontColor=#333333;strokeColor=#666666;" vertex="1" parent="1"><mxGeometry x="330" y="530" width="300" height="650" as="geometry"/></mxCell>
-                <mxCell id="ds1" value="Cek Apakah Profil&#xa;Sedang Digunakan" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;arcSize=30;" vertex="1" parent="ds"><mxGeometry x="65" y="120" width="170" height="50" as="geometry"/></mxCell>
-                <mxCell id="ds2" value="Sedang Digunakan?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="ds"><mxGeometry x="90" y="200" width="120" height="70" as="geometry"/></mxCell>
-                <mxCell id="ds3" value="Hapus dari DB &amp; Kirim&#xa;Hapus PPP Profile" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;arcSize=30;" vertex="1" parent="ds"><mxGeometry x="65" y="310" width="170" height="50" as="geometry"/></mxCell>
-                <mxCell id="ds4" value="Hapus di Router Berhasil?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="ds"><mxGeometry x="90" y="400" width="120" height="70" as="geometry"/></mxCell>
-                <mxCell id="ds5" value="Hapus Cache" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;arcSize=30;" vertex="1" parent="ds"><mxGeometry x="65" y="510" width="170" height="50" as="geometry"/></mxCell>
-                <mxCell id="eds1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="ds" source="ds1" target="ds2"><mxGeometry relative="1" as="geometry"/></mxCell>
-                <mxCell id="eds2" value="Tidak" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#82b366;fontColor=#82b366;fontStyle=1;" edge="1" parent="ds" source="ds2" target="ds3"><mxGeometry relative="1" as="geometry"/></mxCell>
-                <mxCell id="eds3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="ds" source="ds3" target="ds4"><mxGeometry relative="1" as="geometry"/></mxCell>
-                <mxCell id="eds4" value="Ya" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#82b366;fontColor=#82b366;fontStyle=1;" edge="1" parent="ds" source="ds4" target="ds5"><mxGeometry relative="1" as="geometry"/></mxCell>
-                <mxCell id="xd1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="du2" target="ds1"><mxGeometry relative="1" as="geometry"/></mxCell>
-                <mxCell id="xd2" value="Ya" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#b85450;fontColor=#b85450;fontStyle=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="ds2" target="du3"><mxGeometry relative="1" as="geometry"/></mxCell>
-                <mxCell id="xd3" value="Tidak" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#b85450;fontColor=#b85450;fontStyle=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="ds4" target="du4"><mxGeometry relative="1" as="geometry"/></mxCell>
-                <mxCell id="xd4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="ds5" target="du5"><mxGeometry relative="1" as="geometry"/></mxCell>
+                <mxCell id="lc" value="Create" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="-302" width="60" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="cu" value="Admin / Teknisi" style="swimlane;whiteSpace=wrap;html=1;startSize=40;fillColor=#f5f5f5;fontColor=#333333;strokeColor=#666666;" parent="1" vertex="1">
+                    <mxGeometry x="30" y="-260" width="260" height="760" as="geometry"/>
+                </mxCell>
+                <mxCell id="cu2" value="Input Data Profil Bandwidth&#xa;(Nama, Upload, Download, Harga)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;arcSize=30;" parent="cu" vertex="1">
+                    <mxGeometry x="60" y="290" width="150" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="yzfeL2V6Xtu2LbpYxVwg-3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="cu" source="yzfeL2V6Xtu2LbpYxVwg-1" target="yzfeL2V6Xtu2LbpYxVwg-2" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="yzfeL2V6Xtu2LbpYxVwg-1" value="Halaman Bandwidth Profile&lt;span style=&quot;color: rgba(0, 0, 0, 0); font-family: monospace; font-size: 0px; text-align: start; text-wrap-mode: nowrap;&quot;&gt;%3CmxGraphModel%3E%3Croot%3E%3CmxCell%20id%3D%220%22%2F%3E%3CmxCell%20id%3D%221%22%20parent%3D%220%22%2F%3E%3CmxCell%20id%3D%222%22%20parent%3D%221%22%20style%3D%22rounded%3D1%3BwhiteSpace%3Dwrap%3Bhtml%3D1%3BfillColor%3D%23dae8fc%3BstrokeColor%3D%236c8ebf%3BfontSize%3D11%3BarcSize%3D30%3B%22%20value%3D%22Input%20Data%20Profil%20Bandwidth%26%2310%3B(Nama%2C%20Upload%2C%20Download%2C%20Harga)%22%20vertex%3D%221%22%3E%3CmxGeometry%20height%3D%2260%22%20width%3D%22150%22%20x%3D%22105%22%20y%3D%22-140%22%20as%3D%22geometry%22%2F%3E%3C%2FmxCell%3E%3C%2Froot%3E%3C%2FmxGraphModel%3E&lt;/span&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;arcSize=30;" parent="cu" vertex="1">
+                    <mxGeometry x="60" y="110" width="150" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="yzfeL2V6Xtu2LbpYxVwg-6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="cu" source="yzfeL2V6Xtu2LbpYxVwg-2" target="cu2" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="yzfeL2V6Xtu2LbpYxVwg-2" value="Klik Tambah" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;arcSize=30;" parent="cu" vertex="1">
+                    <mxGeometry x="60" y="200" width="150" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="yzfeL2V6Xtu2LbpYxVwg-5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="cu" source="yzfeL2V6Xtu2LbpYxVwg-4" target="yzfeL2V6Xtu2LbpYxVwg-1" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="yzfeL2V6Xtu2LbpYxVwg-4" value="" style="ellipse;aspect=fixed;fillColor=#000000;strokeColor=#000000;" parent="cu" vertex="1">
+                    <mxGeometry x="121" y="60" width="28" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="cs" value="Sistem" style="swimlane;whiteSpace=wrap;html=1;startSize=40;fillColor=#f5f5f5;fontColor=#333333;strokeColor=#666666;" parent="1" vertex="1">
+                    <mxGeometry x="290" y="-260" width="420" height="760" as="geometry"/>
+                </mxCell>
+                <mxCell id="cs1" value="Validasi Input Data Profil" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;arcSize=30;" parent="cs" vertex="1">
+                    <mxGeometry x="120" y="80" width="170" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="cs2" value="Data Valid?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" parent="cs" vertex="1">
+                    <mxGeometry x="145" y="160" width="120" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="ecs1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" parent="cs" source="cs1" target="cs2" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="cu3" value="Error: Data tidak valid" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;arcSize=30;" parent="cs" vertex="1">
+                    <mxGeometry x="10" y="240" width="140" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="xc2" value="Tidak" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#b85450;fontColor=#b85450;fontStyle=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="cs" source="cs2" target="cu3" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="cs3" value="Cek Ketersediaan&#xa;Router Target" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;arcSize=30;" parent="cs" vertex="1">
+                    <mxGeometry x="240" y="250" width="170" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="ecs2" value="Ya" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#82b366;fontColor=#82b366;fontStyle=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" parent="cs" source="cs2" target="cs3" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="cs4" value="Router Tersedia?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" parent="cs" vertex="1">
+                    <mxGeometry x="145" y="330" width="120" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="ecs3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" parent="cs" source="cs3" target="cs4" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="cs5" value="Simpan Profil ke DB &amp;&#xa;Sync ke MikroTik" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;arcSize=30;" parent="cs" vertex="1">
+                    <mxGeometry x="240" y="430" width="170" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="ecs4" value="Ya" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#82b366;fontColor=#82b366;fontStyle=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" parent="cs" source="cs4" target="cs5" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="cu4" value="Error: Router tidak ditemukan" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;arcSize=30;" parent="cs" vertex="1">
+                    <mxGeometry x="10" y="440" width="140" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="xc3" value="Tidak" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#b85450;fontColor=#b85450;fontStyle=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" parent="cs" source="cs4" target="cu4" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="cs6" value="Sync Berhasil?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" parent="cs" vertex="1">
+                    <mxGeometry x="145" y="510" width="120" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="ecs5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" parent="cs" source="cs5" target="cs6" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="3" style="edgeStyle=elbowEdgeStyle;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;elbow=vertical;" edge="1" parent="cs" source="cu6" target="cu7">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="cu6" value="Berhasil: Profil bandwidth&#xa;dibuat dan tersinkronisasi" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;arcSize=30;" parent="cs" vertex="1">
+                    <mxGeometry x="250" y="590" width="140" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="xc5" value="Ya" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#82b366;fontColor=#82b366;fontStyle=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" parent="cs" source="cs6" target="cu6" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="300" y="550" as="sourcePoint"/>
+                        <Array as="points">
+                            <mxPoint x="320" y="545"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="cu7" value="" style="shape=doubleEllipse;aspect=fixed;fillColor=#000000;strokeColor=#000000;" parent="cs" vertex="1">
+                    <mxGeometry x="190" y="695" width="30" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="2" style="edgeStyle=elbowEdgeStyle;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;elbow=vertical;" edge="1" parent="cs" source="cu5" target="cu7">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="cu5" value="Warning: Tersimpan di DB,&#xa;gagal sync ke router" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;arcSize=30;" parent="cs" vertex="1">
+                    <mxGeometry x="30" y="590" width="140" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="xc4" value="Tidak" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#b85450;fontColor=#b85450;fontStyle=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="cs" source="cs6" target="cu5" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="lu" value="Update" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+                    <mxGeometry x="780" y="-300" width="60" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="uu" value="Admin / Teknisi" style="swimlane;whiteSpace=wrap;html=1;startSize=40;fillColor=#f5f5f5;fontColor=#333333;strokeColor=#666666;" parent="1" vertex="1">
+                    <mxGeometry x="740" y="-258" width="280" height="768" as="geometry"/>
+                </mxCell>
+                <mxCell id="yzfeL2V6Xtu2LbpYxVwg-9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="uu" source="uu1" target="yzfeL2V6Xtu2LbpYxVwg-7" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="uu1" value="" style="ellipse;aspect=fixed;fillColor=#000000;strokeColor=#000000;" parent="uu" vertex="1">
+                    <mxGeometry x="120" y="60" width="28" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="uu2" value="Pilih Profil Bandwidth&#xa;yang Akan Diupdate" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;arcSize=30;" parent="uu" vertex="1">
+                    <mxGeometry x="65" y="232" width="140" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="uu3" value="Edit Parameter Bandwidth" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;arcSize=30;" parent="uu" vertex="1">
+                    <mxGeometry x="70" y="328" width="140" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="euu1" style="edgeStyle=none;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" parent="uu" source="yzfeL2V6Xtu2LbpYxVwg-7" target="uu2" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="140" y="200" as="sourcePoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="yzfeL2V6Xtu2LbpYxVwg-7" value="Halaman Bandwidth Profile&lt;span style=&quot;color: rgba(0, 0, 0, 0); font-family: monospace; font-size: 0px; text-align: start; text-wrap-mode: nowrap;&quot;&gt;%3CmxGraphModel%3E%3Croot%3E%3CmxCell%20id%3D%220%22%2F%3E%3CmxCell%20id%3D%221%22%20parent%3D%220%22%2F%3E%3CmxCell%20id%3D%222%22%20parent%3D%221%22%20style%3D%22rounded%3D1%3BwhiteSpace%3Dwrap%3Bhtml%3D1%3BfillColor%3D%23dae8fc%3BstrokeColor%3D%236c8ebf%3BfontSize%3D11%3BarcSize%3D30%3B%22%20value%3D%22Input%20Data%20Profil%20Bandwidth%26%2310%3B(Nama%2C%20Upload%2C%20Download%2C%20Harga)%22%20vertex%3D%221%22%3E%3CmxGeometry%20height%3D%2260%22%20width%3D%22150%22%20x%3D%22105%22%20y%3D%22-140%22%20as%3D%22geometry%22%2F%3E%3C%2FmxCell%3E%3C%2Froot%3E%3C%2FmxGraphModel%3E&lt;/span&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;arcSize=30;" parent="uu" vertex="1">
+                    <mxGeometry x="60" y="120" width="150" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="us" value="Sistem" style="swimlane;whiteSpace=wrap;html=1;startSize=40;fillColor=#f5f5f5;fontColor=#333333;strokeColor=#666666;" parent="1" vertex="1">
+                    <mxGeometry x="1020" y="-258" width="450" height="768" as="geometry"/>
+                </mxCell>
+                <mxCell id="us1" value="Ambil Data Profil dari DB" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;arcSize=30;" parent="us" vertex="1">
+                    <mxGeometry x="160" y="98" width="170" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="us2" value="Validasi Perubahan Data" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;arcSize=30;" parent="us" vertex="1">
+                    <mxGeometry x="160" y="208" width="170" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="us3" value="Perubahan Valid?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" parent="us" vertex="1">
+                    <mxGeometry x="185" y="298" width="120" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="eus1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" parent="us" source="us2" target="us3" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="us4" value="Update DB &amp; Sync&#xa;PPP Profile ke MikroTik" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;arcSize=30;" parent="us" vertex="1">
+                    <mxGeometry x="260" y="408" width="170" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="eus2" value="Ya" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#82b366;fontColor=#82b366;fontStyle=1;" parent="us" source="us3" target="us4" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="uu4" value="Error: Data tidak valid" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;arcSize=30;" parent="us" vertex="1">
+                    <mxGeometry x="20" y="388" width="140" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="xu4" value="Tidak" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#b85450;fontColor=#b85450;fontStyle=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" parent="us" source="us3" target="uu4" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="us5" value="Update Berhasil?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" parent="us" vertex="1">
+                    <mxGeometry x="165" y="488" width="120" height="88" as="geometry"/>
+                </mxCell>
+                <mxCell id="eus3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" parent="us" source="us4" target="us5" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="4" style="edgeStyle=elbowEdgeStyle;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;elbow=vertical;" edge="1" parent="us" source="uu6" target="uu7">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="uu6" value="Berhasil: Profil bandwidth&#xa;diupdate" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;arcSize=30;" parent="us" vertex="1">
+                    <mxGeometry x="275" y="588" width="140" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="xu6" value="Ya" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#82b366;fontColor=#82b366;fontStyle=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="us" source="us5" target="uu6" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="5" style="edgeStyle=elbowEdgeStyle;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;elbow=vertical;" edge="1" parent="us" source="uu5" target="uu7">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="uu5" value="Warning: DB updated,&#xa;router gagal" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;arcSize=30;" parent="us" vertex="1">
+                    <mxGeometry x="10" y="588" width="140" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="xu5" value="Tidak" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#b85450;fontColor=#b85450;fontStyle=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="us" source="us5" target="uu5" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="80" y="532"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="uu7" value="" style="shape=doubleEllipse;aspect=fixed;fillColor=#000000;strokeColor=#000000;" parent="us" vertex="1">
+                    <mxGeometry x="211" y="708" width="28" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="ld" value="Delete" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+                    <mxGeometry x="450" y="540" width="60" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="du" value="Admin / Teknisi" style="swimlane;whiteSpace=wrap;html=1;startSize=40;fillColor=#f5f5f5;fontColor=#333333;strokeColor=#666666;" parent="1" vertex="1">
+                    <mxGeometry x="450" y="580" width="250" height="650" as="geometry"/>
+                </mxCell>
+                <mxCell id="du2" value="Pilih Profil Bandwidth&#xa;untuk Dihapus" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;arcSize=30;" parent="du" vertex="1">
+                    <mxGeometry x="40" y="220" width="140" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="edu1" style="edgeStyle=none;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" parent="du" source="yzfeL2V6Xtu2LbpYxVwg-8" target="du2" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="110" y="187.99999999999955" as="sourcePoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="yzfeL2V6Xtu2LbpYxVwg-11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="du" source="yzfeL2V6Xtu2LbpYxVwg-10" target="yzfeL2V6Xtu2LbpYxVwg-8" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="yzfeL2V6Xtu2LbpYxVwg-10" value="" style="ellipse;aspect=fixed;fillColor=#000000;strokeColor=#000000;" parent="du" vertex="1">
+                    <mxGeometry x="96" y="60" width="28" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="yzfeL2V6Xtu2LbpYxVwg-8" value="Halaman Bandwidth Profile&lt;span style=&quot;color: rgba(0, 0, 0, 0); font-family: monospace; font-size: 0px; text-align: start; text-wrap-mode: nowrap;&quot;&gt;%3CmxGraphModel%3E%3Croot%3E%3CmxCell%20id%3D%220%22%2F%3E%3CmxCell%20id%3D%221%22%20parent%3D%220%22%2F%3E%3CmxCell%20id%3D%222%22%20parent%3D%221%22%20style%3D%22rounded%3D1%3BwhiteSpace%3Dwrap%3Bhtml%3D1%3BfillColor%3D%23dae8fc%3BstrokeColor%3D%236c8ebf%3BfontSize%3D11%3BarcSize%3D30%3B%22%20value%3D%22Input%20Data%20Profil%20Bandwidth%26%2310%3B(Nama%2C%20Upload%2C%20Download%2C%20Harga)%22%20vertex%3D%221%22%3E%3CmxGeometry%20height%3D%2260%22%20width%3D%22150%22%20x%3D%22105%22%20y%3D%22-140%22%20as%3D%22geometry%22%2F%3E%3C%2FmxCell%3E%3C%2Froot%3E%3C%2FmxGraphModel%3E&lt;/span&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;arcSize=30;" parent="du" vertex="1">
+                    <mxGeometry x="35" y="120" width="150" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="ds" value="Sistem" style="swimlane;whiteSpace=wrap;html=1;startSize=40;fillColor=#f5f5f5;fontColor=#333333;strokeColor=#666666;" parent="1" vertex="1">
+                    <mxGeometry x="700" y="580" width="440" height="650" as="geometry"/>
+                </mxCell>
+                <mxCell id="ds1" value="Cek Apakah Profil&#xa;Sedang Digunakan" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;arcSize=30;" parent="ds" vertex="1">
+                    <mxGeometry x="90" y="60" width="170" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="ds2" value="Sedang Digunakan?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" parent="ds" vertex="1">
+                    <mxGeometry x="115" y="160" width="120" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="eds1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" parent="ds" source="ds1" target="ds2" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="ds3" value="Hapus dari DB &amp; Kirim&#xa;Hapus PPP Profile" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;arcSize=30;" parent="ds" vertex="1">
+                    <mxGeometry x="201" y="240" width="170" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="eds2" value="Tidak" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#82b366;fontColor=#82b366;fontStyle=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" parent="ds" source="ds2" target="ds3" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="du3" value="Gagal: Profil masih aktif&#xa;digunakan pelanggan" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;arcSize=30;" parent="ds" vertex="1">
+                    <mxGeometry x="15" y="240" width="140" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="xd2" value="Ya" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#b85450;fontColor=#b85450;fontStyle=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="ds" source="ds2" target="du3" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="ds4" value="Hapus di Router Berhasil?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" parent="ds" vertex="1">
+                    <mxGeometry x="115" y="320" width="120" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="eds3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" parent="ds" source="ds3" target="ds4" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="7" style="edgeStyle=elbowEdgeStyle;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;elbow=vertical;" edge="1" parent="ds" source="ds5" target="du5">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="ds5" value="Hapus Cache" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;arcSize=30;" parent="ds" vertex="1">
+                    <mxGeometry x="250" y="380" width="170" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="eds4" value="Ya" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#82b366;fontColor=#82b366;fontStyle=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="ds" source="ds4" target="ds5" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="du5" value="Berhasil: Profil bandwidth&#xa;dihapus permanen" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;arcSize=30;" parent="ds" vertex="1">
+                    <mxGeometry x="145" y="500" width="140" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="du6" value="" style="shape=doubleEllipse;aspect=fixed;fillColor=#000000;strokeColor=#000000;" parent="ds" vertex="1">
+                    <mxGeometry x="201" y="600" width="28" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="edu2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" parent="ds" source="du5" target="du6" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="8" style="edgeStyle=elbowEdgeStyle;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;elbow=vertical;" edge="1" parent="ds" source="du4" target="du5">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="du4" value="Warning: Terhapus di DB,&#xa;gagal di router" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;arcSize=30;" parent="ds" vertex="1">
+                    <mxGeometry x="15" y="390" width="140" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="xd3" value="Tidak" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#b85450;fontColor=#b85450;fontStyle=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="ds" source="ds4" target="du4" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="xc1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="cu2" target="cs1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="280" y="60"/>
+                            <mxPoint x="280" y="-155"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="xu1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="uu2" target="us1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="1030" y="4"/>
+                            <mxPoint x="1030" y="-135"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="xu2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="us1" target="uu3" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="1160" y="-135"/>
+                            <mxPoint x="1160" y="-90"/>
+                            <mxPoint x="1065" y="-90"/>
+                            <mxPoint x="1065" y="95"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="xu3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="uu3" target="us2" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="950" y="100"/>
+                            <mxPoint x="1100" y="100"/>
+                            <mxPoint x="1100" y="-25"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="xd1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="du2" target="ds1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="680" y="830"/>
+                            <mxPoint x="680" y="665"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
             </root>
         </mxGraphModel>
     </diagram>
